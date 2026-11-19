@@ -38,6 +38,7 @@ package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. 
 local say = require("ReaClassical_Announce")
 local track_scan = require("ReaClassical_Track_Scan")
 local track_write = require("ReaClassical_Track_Write")
+local global_take = require("ReaClassical_Global_Take")
 local spare_track = require("ReaClassical_Spare_Track")
 
 local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -144,6 +145,7 @@ function main()
             end
         end
         SetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs", table.concat(recorded_guids, ","))
+        global_take.assign_to_guids(table.concat(recorded_guids, ","))
         Main_OnCommand(40289, 0)
 
         if workflow == "Vertical" and not get_record_takes_horizontally() then

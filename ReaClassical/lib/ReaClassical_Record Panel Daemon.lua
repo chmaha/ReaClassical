@@ -36,6 +36,7 @@ local parent_path = script_path:match("^(.+[\\/]).+[\\/]$") or script_path
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
 local say = require("ReaClassical_Announce")
+local global_take = require("ReaClassical_Global_Take")
 local _, prev_recfilename = get_config_var_string("recfile_wildcards")
 
 local rec_color      = ColorToNative(255, 0, 0)    | 0x1000000
@@ -652,6 +653,8 @@ local function main()
             take_text = last_recorded_take
             apply_rank_and_notes_by_guids()
             take_text = next_take
+            local _, recorded_guids = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
+            global_take.assign_to_guids(recorded_guids)
         end
     elseif playstate == 5 or playstate == 6 then
         if not iterated_filenames then do_get_take_count(session) end

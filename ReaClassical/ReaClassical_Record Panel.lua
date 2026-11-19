@@ -29,6 +29,7 @@ local gui_mode = require("ReaClassical_GuiMode")
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
+local global_take = require("ReaClassical_Global_Take")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
 
 local _, debug_str = GetProjExtState(0, "ReaClassical", "DebugAnnounce")
@@ -303,6 +304,8 @@ function main()
         apply_rank_and_notes_to_items(apply_pos)
         store_last_recorded_guids(apply_pos)
       end
+      local _, recorded_guids = GetProjExtState(0, "ReaClassical", "LastRecordedItemGUIDs")
+      global_take.assign_to_guids(recorded_guids)
       stop_cursor_pos = nil
 
       had_recent_recording = true
@@ -954,6 +957,25 @@ function draw(playstate)
     end
   end
 
+  if global_take.enabled() then
+    local global_label
+    local editing_global = editing_item and ValidatePtr2(0, editing_item, "MediaItem*")
+        and global_take.get(editing_item)
+    if playstate == 0 and editing_global then
+      global_label = "Global take " .. editing_global
+    elseif playstate == 5 or playstate == 6 then
+      global_label = "Global take " .. global_take.get_next()
+    else
+      global_label = "Next global take " .. global_take.get_next()
+    end
+    ImGui.PushFont(ctx, small_font, 15 * scale)
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xAAAAAAFF)
+    ImGui.SetCursorPos(ctx, 10 * scale, 10 * scale)
+    ImGui.Text(ctx, global_label)
+    ImGui.PopStyleColor(ctx)
+    ImGui.PopFont(ctx)
+  end
+
   ImGui.PushFont(ctx, large_font, 175 * scale)
   local take_str = tostring(take_text)
   local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
@@ -1406,6 +1428,22 @@ function draw(playstate)
       if rv_ao then
         allow_overlapping_takes = new_ao
         SetProjExtState(0, "ReaClassical", "AllowOverlappingTakes", allow_overlapping_takes and "1" or "0")
+      end
+
+      ImGui.TableNextRow(ctx)
+      ImGui.TableSetColumnIndex(ctx, 0)
+      ImGui.AlignTextToFramePadding(ctx)
+      ImGui.Text(ctx, "Next Global Take Number:")
+      ImGui.TableSetColumnIndex(ctx, 1)
+      local global_disabled = not global_take.enabled()
+      if global_disabled then ImGui.BeginDisabled(ctx, true) end
+      ImGui.SetNextItemWidth(ctx, 120)
+      local rv_gt, new_gt = ImGui.InputInt(ctx, "##global_take_next", global_take.get_next())
+      if rv_gt and not global_disabled then global_take.set_next(new_gt) end
+      if global_disabled then ImGui.EndDisabled(ctx) end
+      if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+        ImGui.SetTooltip(ctx, global_disabled and "Enable Global Take Numbers in Preferences (F5)"
+          or "Project-wide take counter, independent of session take numbers")
       end
 
       ImGui.EndTable(ctx)
