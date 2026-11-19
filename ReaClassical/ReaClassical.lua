@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.26
+@version 27.0.27
 @changelog
-  Fix ranking coloring
+  Recursively set global take number on older projects
 @metapackage
 @provides
   [main] ReaClassical_*.lua
