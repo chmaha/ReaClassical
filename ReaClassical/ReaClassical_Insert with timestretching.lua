@@ -44,6 +44,7 @@ local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
 local sd_snapshot = require("ReaClassical_SD_Snapshot")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
 local active_folder = require("ReaClassical_Active_Folder")
+local edit_playback = require("ReaClassical_Edit_Playback")
 
 function main()
     PreventUIRefresh(1)
@@ -127,6 +128,7 @@ function main()
     end
 
     local sliver_note = ""
+    local playback_pos
     if dest_count + source_count == 4 then
         local selected_items = {}
         move_to_project_tab(source_proj)
@@ -222,6 +224,7 @@ function main()
         if first_pasted_item then SetMediaItemSelected(first_pasted_item, true) end
         active_folder.set_active(GetSelectedTrack(0, 0))
         restore_all_ripple()
+        playback_pos = edit_playback.marker_pos(996)
 
         local warning = nil
         if shortened_in or shortened_out then
@@ -254,6 +257,10 @@ function main()
 
     if sliver_note ~= "" then
         MB(sliver_note, "Replace with timestretching", 0)
+    end
+
+    if playback_pos and edit_playback.enabled() then
+        edit_playback.play_from(playback_pos)
     end
 end
 

@@ -44,6 +44,8 @@ local say = require("ReaClassical_Announce")
 local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
 local sd_snapshot = require("ReaClassical_SD_Snapshot")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
+local active_folder = require("ReaClassical_Active_Folder")
+local edit_playback = require("ReaClassical_Edit_Playback")
 
 function main()
     PreventUIRefresh(1)
@@ -165,6 +167,7 @@ function main()
 
     local shortened_in, shortened_out, applied_in, applied_out
     local sliver_note = ""
+    local playback_pos
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _, _ = markers()
     if new_dest_count + new_source_count == 4 then
         move_to_project_tab(source_proj)
@@ -180,6 +183,7 @@ function main()
         fix_marker_pair(996, 997)
         select_matching_dest_folder()
         sliver_note = sanitize_marker_zones({ { id = 996, label = "DEST-IN" } })
+        playback_pos = edit_playback.marker_pos(996)
         sd_snapshot.capture(sd_xfade.folder_tracks(GetSelectedTrack(0, 0)),
             sd_snapshot.marker_pos(996))
         trim_left_item_to_dest_in()
@@ -265,6 +269,13 @@ function main()
     local completion = "Insert edit complete"
     if warning then completion = completion .. ". " .. warning end
     say(completion)
+
+    if playback_pos and edit_playback.enabled() then
+        if dest_proj then move_to_project_tab(dest_proj) end
+        select_matching_dest_folder()
+        active_folder.set_active(GetSelectedTrack(0, 0))
+        edit_playback.play_from(playback_pos)
+    end
 end
 
 function markers()

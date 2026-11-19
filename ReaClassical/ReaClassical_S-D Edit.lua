@@ -47,6 +47,7 @@ local sd_xfade = require("ReaClassical_SD_Crossfade_Utils")
 local sd_snapshot = require("ReaClassical_SD_Snapshot")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
 local active_folder = require("ReaClassical_Active_Folder")
+local edit_playback = require("ReaClassical_Edit_Playback")
 
 function main()
     PreventUIRefresh(1)
@@ -197,6 +198,7 @@ function main()
     end
 
     local sliver_note = ""
+    local playback_pos
     local _, _, _, _, _, new_dest_count, _, _, new_source_count, _, _ = markers()
     if new_dest_count + new_source_count == 4 then
         move_to_project_tab(source_proj)
@@ -245,6 +247,7 @@ function main()
         sd_snapshot.commit()
         if moveable_dest == 1 then move_destination_folder(src_track_number) end
 
+        playback_pos = edit_playback.marker_pos(996)
         clean_up(is_selected, dest_in, dest_out, source_in, source_out)
         Main_OnCommand(40289, 0)
         if first_pasted_item then SetMediaItemSelected(first_pasted_item, true) end
@@ -287,6 +290,10 @@ function main()
 
     if sliver_note ~= "" then
         MB(sliver_note, "Source-Destination Edit", 0)
+    end
+
+    if playback_pos and edit_playback.enabled() then
+        edit_playback.play_from(playback_pos)
     end
 end
 
