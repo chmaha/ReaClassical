@@ -1,8 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.25
+@version 27.0.26
 @changelog
-  Improve global take number positioning
+  Fix ranking coloring
 @metapackage
 @provides
   [main] ReaClassical_*.lua
