@@ -537,145 +537,89 @@ end
 function save_item_rank_and_notes(item, rank, note)
   if not item then return end
 
-  local _, colorized = GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", false)
-  local is_colorized = (colorized == "y")
+  local items = { item }
+  local item_track = GetMediaItemTrack(item)
+  local track_num = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
+  local num_tracks = CountTracks(0)
+  local folder_start, folder_end = nil, nil
+  local start_search = track_num
+  if GetMediaTrackInfo_Value(item_track, "I_FOLDERDEPTH") ~= 1 then
+    for t = track_num - 1, 0, -1 do
+      local tt = GetTrack(0, t)
+      if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+        start_search = t; break
+      end
+    end
+  end
+  for t = start_search, num_tracks - 1 do
+    local tt = GetTrack(0, t)
+    if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
+      folder_start = t; folder_end = t
+      local x = t + 1
+      while x < num_tracks do
+        local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
+        folder_end = x
+        if d < 0 then break end
+        x = x + 1
+      end
+      break
+    end
+  end
+  if folder_start then
+    for _, peer in ipairs(get_folder_items_at_midpoint(item, folder_start, folder_end)) do
+      if peer ~= item then items[#items + 1] = peer end
+    end
+  end
 
-  GetSetMediaItemInfo_String(item, "P_EXT:item_rank", rank, true)
+  local color_source = item
+  if folder_start then
+    local parent_track = GetTrack(0, folder_start)
+    for _, it in ipairs(items) do
+      if GetMediaItemTrack(it) == parent_track then
+        color_source = it
+        break
+      end
+    end
+  end
 
   local color_to_use
   if rank ~= "" then
-    if is_colorized then
-      GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
-    end
     if ranking_color_pref == 0 then
       local rank_index = tonumber(rank)
       if rank_index and RANKS[rank_index] then
         color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
       else
-        color_to_use = get_item_color(item)
+        color_to_use = get_item_color(color_source)
       end
+    end
+  elseif auto_color_pref == 0 then
+    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
+    local _, stored_take_num = GetSetMediaItemInfo_String(color_source, "P_EXT:item_take_num", "", false)
+    local take_num = tonumber(stored_take_num)
+    if workflow == "Horizontal" and take_num then
+      color_to_use = pastel_color(take_num - 1)
+    else
+      color_to_use = get_item_color(color_source)
     end
   else
-    if is_colorized then
-      GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
-    end
-    if auto_color_pref == 0 then
-      local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-      if workflow == "Horizontal" then
-        local _, stored_take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
-        if stored_take_num ~= "" then
-          local take_num = tonumber(stored_take_num)
-          if take_num then
-            color_to_use = pastel_color(take_num - 1)
-          else
-            color_to_use = get_item_color(item)
-          end
-        else
-          color_to_use = get_item_color(item)
-        end
-      else
-        color_to_use = get_item_color(item)
-      end
-    else
-      color_to_use = 0
-    end
+    color_to_use = 0
   end
 
-  if color_to_use then
-    SetMediaItemInfo_Value(item, "I_CUSTOMCOLOR", color_to_use)
-    UpdateItemInProject(item)
-  end
+  for _, it in ipairs(items) do
+    GetSetMediaItemInfo_String(it, "P_EXT:item_rank", rank, true)
+    GetSetMediaItemInfo_String(it, "P_NOTES", note, true)
 
-  update_take_name(item, rank)
-
-  GetSetMediaItemInfo_String(item, "P_NOTES", note, true)
-
-  do
-    local item_track = GetMediaItemTrack(item)
-    local track_num = GetMediaTrackInfo_Value(item_track, "IP_TRACKNUMBER") - 1
-    local num_tracks = CountTracks(0)
-    local folder_start, folder_end = nil, nil
-    local start_search = track_num
-    if GetMediaTrackInfo_Value(item_track, "I_FOLDERDEPTH") ~= 1 then
-      for t = track_num - 1, 0, -1 do
-        local tt = GetTrack(0, t)
-        if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
-          start_search = t; break
-        end
-      end
+    local _, colorized = GetSetMediaItemInfo_String(it, "P_EXT:colorized", "", false)
+    if colorized == "y" then
+      GetSetMediaItemInfo_String(it, "P_EXT:colorized", "", true)
     end
-    for t = start_search, num_tracks - 1 do
-      local tt = GetTrack(0, t)
-      if GetMediaTrackInfo_Value(tt, "I_FOLDERDEPTH") == 1 then
-        folder_start = t; folder_end = t
-        local x = t + 1
-        while x < num_tracks do
-          local d = GetMediaTrackInfo_Value(GetTrack(0, x), "I_FOLDERDEPTH")
-          folder_end = x
-          if d < 0 then break end
-          x = x + 1
-        end
-        break
-      end
+
+    if color_to_use then
+      SetMediaItemInfo_Value(it, "I_CUSTOMCOLOR", color_to_use)
+      UpdateItemInProject(it)
     end
-    if folder_start then
-      local peers = get_folder_items_at_midpoint(item, folder_start, folder_end)
-      for _, peer in ipairs(peers) do
-        if peer ~= item then
-          GetSetMediaItemInfo_String(peer, "P_EXT:item_rank", rank, true)
-          GetSetMediaItemInfo_String(peer, "P_NOTES", note, true)
 
-          local _, peer_colorized = GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", false)
-          local peer_is_colorized = (peer_colorized == "y")
-
-          local peer_color
-          if rank ~= "" then
-            if peer_is_colorized then
-              GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", true)
-            end
-            if ranking_color_pref == 0 then
-              local rank_index = tonumber(rank)
-              if rank_index and RANKS[rank_index] then
-                peer_color = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
-              else
-                peer_color = get_item_color(peer)
-              end
-            end
-          else
-            if peer_is_colorized then
-              GetSetMediaItemInfo_String(peer, "P_EXT:colorized", "", true)
-            end
-            if auto_color_pref == 0 then
-              local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
-              if wf == "Horizontal" then
-                local _, stored_take_num = GetSetMediaItemInfo_String(peer, "P_EXT:item_take_num", "", false)
-                if stored_take_num ~= "" then
-                  local take_num = tonumber(stored_take_num)
-                  if take_num then
-                    peer_color = pastel_color(take_num - 1)
-                  else
-                    peer_color = get_item_color(peer)
-                  end
-                else
-                  peer_color = get_item_color(peer)
-                end
-              else
-                peer_color = get_item_color(peer)
-              end
-            else
-              peer_color = 0
-            end
-          end
-
-          if peer_color then
-            SetMediaItemInfo_Value(peer, "I_CUSTOMCOLOR", peer_color)
-            UpdateItemInProject(peer)
-          end
-
-          update_take_name(peer, rank)
-        end
-      end
-    end
+    update_take_name(it, rank)
   end
 
   UpdateArrange()

@@ -243,15 +243,24 @@ function M.apply_rank(item, rank_str)
     local rank_index = tonumber(rank_str)
     local rank = (rank_index and M.RANKS[rank_index]) and M.RANKS[rank_index] or M.RANKS[9]
 
+    local peers = M.get_items_at_midpoint(item)
+    local color_source = item
+    for _, peer in ipairs(peers) do
+        if GetMediaTrackInfo_Value(GetMediaItemTrack(peer), "I_FOLDERDEPTH") == 1 then
+            color_source = peer
+            break
+        end
+    end
+
     local color_to_use
     if rank_str == "" or M.get_ranking_color_pref() == 1 then
-        color_to_use = M.get_item_color(item)
+        color_to_use = M.get_item_color(color_source)
     else
         GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
         color_to_use = rgba_to_native(rank.rgba) | 0x1000000
     end
 
-    for _, peer in ipairs(M.get_items_at_midpoint(item)) do
+    for _, peer in ipairs(peers) do
         SetMediaItemInfo_Value(peer, "I_CUSTOMCOLOR", color_to_use)
 
         local peer_take = GetActiveTake(peer)

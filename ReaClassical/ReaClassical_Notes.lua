@@ -517,20 +517,27 @@ end
 
 function apply_rank_color(item, rank)
     local color_to_use
+    local peers = get_items_at_midpoint(item)
+    local color_source = item
+    for _, peer in ipairs(peers) do
+        if GetMediaTrackInfo_Value(GetMediaItemTrack(peer), "I_FOLDERDEPTH") == 1 then
+            color_source = peer
+            break
+        end
+    end
 
     if rank == "" or ranking_color_pref == 1 then
-        color_to_use = get_item_color(item)
+        color_to_use = get_item_color(color_source)
     else
         GetSetMediaItemInfo_String(item, "P_EXT:colorized", "", true)
         local rank_index = tonumber(rank)
         if rank_index and RANKS[rank_index] then
             color_to_use = rgba_to_native(RANKS[rank_index].rgba) | 0x1000000
         else
-            color_to_use = get_item_color(item)
+            color_to_use = get_item_color(color_source)
         end
     end
 
-    local peers = get_items_at_midpoint(item)
     for _, peer in ipairs(peers) do
         SetMediaItemInfo_Value(peer, "I_CUSTOMCOLOR", color_to_use)
 
