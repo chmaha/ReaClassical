@@ -21,8 +21,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 -- luacheck: ignore 113
 
 for key in pairs(reaper) do _G[key] = reaper[key] end
-local main, build_item_table, format_timecode, get_html_file
-local parse_timecode, get_offset
+local main, get_html_file
+
+local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
+package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
+local edit_list = require("ReaClassical_Edit_List")
 
 function main()
     PreventUIRefresh(1)
@@ -39,12 +42,12 @@ function main()
         return
     end
 
-    local offset = get_offset()
+    local offset = edit_list.ask_offset()
 
     local project_name = GetProjectName(0)
     local fps = TimeMap_curFrameRate(0)
     local date = os.date("%y-%m-%d %H:%M:%S")
-    local items = build_item_table(fps, offset)
+    local items = edit_list.build(GetTrack(0, 0), fps, { bwf = true, offset_frames = offset })
 
     local csv = "Edit,Start,Source In,Source Out,End Check,Playback Rate\n"
     for _, item in ipairs(items) do
@@ -188,106 +191,6 @@ function main()
     UpdateTimeline()
 end
 
-function format_timecode(seconds, fps, offset_frames)
-    local total_frames = math.floor(seconds * fps) + offset_frames
-    local h = math.floor(total_frames / (3600 * fps))
-    local m = math.floor((total_frames % (3600 * fps)) / (60 * fps))
-    local s = math.floor((total_frames % (60 * fps)) / fps)
-    local f = total_frames % fps
-    return string.format("%02d:%02d:%02d:%02d", h, m, s, f)
-end
-
-function build_item_table(fps, offset)
-    local item_table = {}
-    local track = GetTrack(0, 0)
-
-    if not track then return item_table end
-
-    local time_sel_start, time_sel_end = GetSet_LoopTimeRange(false, false, 0, 0, false)
-    local has_time_sel = (time_sel_end > time_sel_start)
-
-    local item_count = CountTrackMediaItems(track)
-    local edit_number = 1
-    local prev_filename = nil
-
-    for i = 0, item_count - 1 do
-        local item = GetTrackMediaItem(track, i)
-        local take = GetActiveTake(item)
-        if not take then goto continue end
-
-        local position = GetMediaItemInfo_Value(item, "D_POSITION")
-        local length = GetMediaItemInfo_Value(item, "D_LENGTH")
-        local item_end = position + length
-
-        if has_time_sel and (item_end <= time_sel_start or position >= time_sel_end) then
-            goto continue
-        end
-
-        local source = GetMediaItemTake_Source(take)
-        local playrate = GetMediaItemTakeInfo_Value(take, "D_PLAYRATE")
-        local full_path = GetMediaSourceFileName(source)
-        local filename = full_path:match("([^\\/]+)$")
-
-        local retval, bwf_offset_str = GetMediaFileMetadata(source, "Generic:StartOffset")
-        local bwf_offset = (retval and bwf_offset_str ~= "") and parse_timecode(bwf_offset_str) or 0
-
-        local item_offset = GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
-
-        local start_offset = bwf_offset + item_offset
-
-        local next_item_position = (i + 1 < item_count) and
-            GetMediaItemInfo_Value(GetTrackMediaItem(track, i + 1), "D_POSITION") or item_end
-
-        local end_offset = math.min(start_offset + next_item_position - position, start_offset + length)
-        local source_length = (end_offset - start_offset)
-
-        if (math.abs(playrate - 1) > 0.001) then
-            source_length = source_length / playrate
-            end_offset = start_offset + source_length
-        end
-
-        if filename == prev_filename then
-            filename = '…'
-        else
-            prev_filename = filename
-        end
-
-        table.insert(item_table, {
-            edit_number = edit_number,
-            position = format_timecode(position, fps, offset),
-            filename = filename,
-            s_in = format_timecode(start_offset, fps, offset),
-            s_out = format_timecode(end_offset, fps, offset),
-            dest_end = format_timecode(position + source_length, fps, offset),
-            playrate = (math.abs(playrate - 1) < 0.001) and "" or playrate
-        })
-
-        edit_number = edit_number + 1
-
-        if i + 1 < item_count then
-            local next_item = GetTrackMediaItem(track, i + 1)
-            local next_position = GetMediaItemInfo_Value(next_item, "D_POSITION")
-
-            if next_position > item_end and (not has_time_sel or next_position < time_sel_end) then
-                table.insert(item_table, {
-                    edit_number = "Gap",
-                    position = "",
-                    filename = "",
-                    s_in = "",
-                    s_out = "",
-                    dest_end = "",
-                    playrate = ""
-                })
-                prev_filename = nil
-            end
-        end
-
-        ::continue::
-    end
-
-    return item_table
-end
-
 function get_html_file()
     local _, path = EnumProjects(-1)
     local slash = package.config:sub(1, 1)
@@ -299,28 +202,6 @@ function get_html_file()
     end
     local file = path .. slash .. 'edit_list_bwfso.html'
     return file
-end
-
-function parse_timecode(timecode)
-    local h, m, s = timecode:match("^(%d+):(%d+):([%d%.]+)$")
-    if h then
-        return tonumber(h) * 3600 + tonumber(m) * 60 + tonumber(s)
-    end
-
-    m, s = timecode:match("^(%d+):([%d%.]+)$")
-    if m then
-        return tonumber(m) * 60 + tonumber(s)
-    end
-
-    return tonumber(timecode) or 0
-end
-
-function get_offset()
-    local retval, input = GetUserInputs("Frame Offset", 1, "Enter offset (frames):", "0")
-    if retval then
-        return tonumber(input) or 0
-    end
-    return 0
 end
 
 main()
