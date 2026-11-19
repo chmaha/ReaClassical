@@ -38,7 +38,7 @@ M.EXPORT_FORMATS = {
     { key = "mp3",  label = "MP3 320" },
 }
 
-local SPECIAL_KEYS = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
+local SPECIAL_KEYS = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback", "notes" }
 
 function M.is_special_track(track)
     for _, key in ipairs(SPECIAL_KEYS) do

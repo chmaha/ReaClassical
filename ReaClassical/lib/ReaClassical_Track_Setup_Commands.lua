@@ -30,6 +30,7 @@ local humanize_track_name = require("ReaClassical_Track_Naming")
 local pan_from_name = require("ReaClassical_Pan_From_Name")
 local mixer_core = require("ReaClassical_Mixer_Core")
 local spare_track = require("ReaClassical_Spare_Track")
+local notes_track = require("ReaClassical_Notes_Track")
 
 local M = {}
 
@@ -786,6 +787,34 @@ function M.try_add_remove(cmd)
         end
         DeleteTrack(pb_list[1].track)
         say("Playback track removed")
+        return true
+    end
+
+    if cmd == "addnotes" then
+        if #mixer_core.get_special_tracks_by_type("notes") > 0 then
+            say("NOTES track already exists")
+            return true
+        end
+        Undo_BeginBlock()
+        notes_track.create()
+        if workflow == "Vertical" then
+            dofile(script_path .. "ReaClassical_Vertical Workflow.lua")
+        else
+            dofile(script_path .. "ReaClassical_Horizontal Workflow.lua")
+        end
+        Undo_EndBlock("Add Notes Track", -1)
+        say("Notes track added")
+        return true
+    end
+
+    if cmd == "rmnotes" then
+        local notes_list = mixer_core.get_special_tracks_by_type("notes")
+        if #notes_list == 0 then
+            say("No NOTES track found")
+            return true
+        end
+        DeleteTrack(notes_list[1].track)
+        say("Notes track removed")
         return true
     end
 

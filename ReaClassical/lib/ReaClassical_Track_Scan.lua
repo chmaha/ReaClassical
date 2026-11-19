@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local TAG_KEYS = {
     "mixer", "aux", "submix", "roomtone", "live",
-    "rcref", "listenback", "rcmaster", "playback",
+    "rcref", "listenback", "rcmaster", "playback", "notes",
 }
 
 local function build()

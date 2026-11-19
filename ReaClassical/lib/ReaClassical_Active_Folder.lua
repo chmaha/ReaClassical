@@ -75,9 +75,10 @@ function M.set_active(folder_track)
         local listenback_state = t.listenback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
+        local notes_state = t.notes
 
         if mixer_state or aux_state or submix_state or rt_state
-            or ref_state or listenback_state or playback_state then
+            or ref_state or listenback_state or playback_state or notes_state then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 set_send_value(track, 0, j, "B_MUTE", 0)
@@ -85,7 +86,7 @@ function M.set_active(folder_track)
         end
 
         if not (mixer_state or aux_state or submix_state or rt_state
-                or ref_state or listenback_state or rcmaster_state or playback_state) then
+                or ref_state or listenback_state or rcmaster_state or playback_state or notes_state) then
             if IsTrackSelected(track) and parent ~= 1 then
                 set_track_value(track, "I_SOLO", 2)
                 set_track_value(track, "B_MUTE", 0)

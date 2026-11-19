@@ -92,11 +92,12 @@ function M.get_special_tracks()
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
+        local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
             or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
-            or playback_state == "y" then
+            or playback_state == "y" or notes_state == "y" then
             local track_type = "other"
             if aux_state == "y" then
                 track_type = "aux"
@@ -114,6 +115,8 @@ function M.get_special_tracks()
                 track_type = "rcmaster"
             elseif playback_state == "y" then
                 track_type = "playback"
+            elseif notes_state == "y" then
+                track_type = "notes"
             end
 
             local display_name = ""

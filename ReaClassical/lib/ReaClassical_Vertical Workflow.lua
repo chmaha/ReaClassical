@@ -49,6 +49,7 @@ local track_scan = require("ReaClassical_Track_Scan")
 local track_write = require("ReaClassical_Track_Write")
 local special_track_order = require("ReaClassical_Special_Track_Order")
 local spare_track = require("ReaClassical_Spare_Track")
+local notes_track = require("ReaClassical_Notes_Track")
 
 local function color_folders(track_table)
     local colors = get_color_table()
@@ -151,6 +152,7 @@ function main()
         local is_empty = false
         delete_non_rc_tracks()
         delete_empty_items()
+        notes_track.enforce(true)
         for i = #pre_selected, 1, -1 do
             if not ValidatePtr(pre_selected[i], "MediaTrack*") then
                 table.remove(pre_selected, i)
@@ -238,6 +240,7 @@ function main()
         local is_empty = true
         delete_non_rc_tracks()
         delete_empty_items()
+        notes_track.enforce(true)
         for i = #pre_selected, 1, -1 do
             if not ValidatePtr(pre_selected[i], "MediaTrack*") then
                 table.remove(pre_selected, i)
@@ -382,14 +385,15 @@ function solo()
         local listenback_state = t.listenback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
+        local notes_state = t.notes
 
         local special_states = mixer_state or aux_state or submix_state
             or rt_state or ref_state or live_state
-            or listenback_state or rcmaster_state or playback_state
+            or listenback_state or rcmaster_state or playback_state or notes_state
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
             or trackname_check(track, "^LIVE") or trackname_check(track, "^REF") or trackname_check(track, "^LISTENBACK")
-            or trackname_check(track, "^PLAYBACK")
+            or trackname_check(track, "^PLAYBACK") or trackname_check(track, "^NOTES")
 
         if special_states or special_names then
             local num_of_sends = GetTrackNumSends(track, 0)
@@ -451,10 +455,11 @@ function mixer()
         local listenback_state = t.listenback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
+        local notes_state = t.notes
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         local is_special_track = aux_state or submix_state or rt_state or
-            live_state or ref_state or rcmaster_state or listenback_state or playback_state
+            live_state or ref_state or rcmaster_state or listenback_state or playback_state or notes_state
 
         local mission_control_tcp_visible = nil
         if is_special_track then
@@ -535,6 +540,15 @@ function mixer()
         if playback_state then
             SetTrackColor(track, colors.playback)
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+
+        if notes_state then
+            SetTrackColor(track, colors.notes)
+            if mission_control_tcp_visible ~= nil then
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", mission_control_tcp_visible and 1 or 0)
+            else
+                SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 1)
+            end
         end
 
         if mixer_state or aux_state or submix_state or rcmaster_state
@@ -958,6 +972,7 @@ function create_track_table(is_empty)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
+        local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
@@ -999,6 +1014,9 @@ function create_track_table(is_empty)
         elseif trackname_check(track, "^PLAYBACK") or playback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:playback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "PLAYBACK", true)
+        elseif trackname_check(track, "^NOTES") or notes_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:notes", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "NOTES", true)
         elseif trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else
@@ -1485,10 +1503,15 @@ end
 function delete_non_rc_tracks()
     local rc_keys = {
         "mix_order", "mixer", "aux", "submix", "roomtone",
-        "live", "rcref", "listenback", "rcmaster", "playback", "Destination", "Source"
+        "live", "rcref", "listenback", "rcmaster", "playback", "notes", "Destination", "Source"
     }
 
     local function is_rc_track(track)
+        local _, track_name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
+        if track_name:match("^NOTES") then
+            GetSetMediaTrackInfo_String(track, "P_EXT:notes", "y", true)
+            return true
+        end
         for _, key in ipairs(rc_keys) do
             local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
             if val ~= "" then return true end
@@ -1533,7 +1556,7 @@ end
 function delete_empty_items()
     for i = CountMediaItems(0) - 1, 0, -1 do
         local item = GetMediaItem(0, i)
-        if not GetActiveTake(item) then
+        if not GetActiveTake(item) and not notes_track.is_notes_track(GetMediaItemTrack(item)) then
             DeleteTrackMediaItem(GetMediaItemTrack(item), item)
         end
     end

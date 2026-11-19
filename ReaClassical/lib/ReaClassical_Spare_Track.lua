@@ -103,7 +103,7 @@ function M.apply_state()
     end
 end
 
-local SPECIAL_KEYS = { "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
+local SPECIAL_KEYS = { "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback", "notes" }
 
 local function is_special_non_mixer(track)
     for _, key in ipairs(SPECIAL_KEYS) do

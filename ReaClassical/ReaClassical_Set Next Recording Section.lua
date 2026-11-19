@@ -284,10 +284,11 @@ function solo()
         local listenback_state = t.listenback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
+        local notes_state = t.notes
 
         if IsTrackSelected(track) == false and not mixer_state and not aux_state
             and not submix_state and not rt_state and not live_state
-            and not listenback_state and not rcmaster_state and not playback_state then
+            and not listenback_state and not rcmaster_state and not playback_state and not notes_state then
             set_track_value(track, "I_SOLO", 0)
             set_track_value(track, "B_MUTE", 1)
         end
@@ -319,10 +320,11 @@ function mixer()
         local listenback_state = t.listenback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
+        local notes_state = t.notes
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         local is_special_track = aux_state or submix_state or rt_state or
-            live_state or ref_state or rcmaster_state or listenback_state or playback_state
+            live_state or ref_state or rcmaster_state or listenback_state or playback_state or notes_state
 
         local mission_control_tcp_visible = nil
         if is_special_track then

@@ -158,6 +158,7 @@ local track_num_format = "%d"
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 local special_track_order = dofile(script_path .. "lib/ReaClassical_Special_Track_Order.lua")
 local spare_track = dofile(script_path .. "lib/ReaClassical_Spare_Track.lua")
+local notes_track = dofile(script_path .. "lib/ReaClassical_Notes_Track.lua")
 
 local function row_select_area(ctx, label, end_x, is_selected)
     local sx, sy = ImGui.GetCursorScreenPos(ctx)
@@ -1314,6 +1315,9 @@ function main()
                     elseif aux_info.type == "playback" then
                         display_prefix = "PB"
                         prefix_color = color_to_native(80, 200, 180)
+                    elseif aux_info.type == "notes" then
+                        display_prefix = "NOTES"
+                        prefix_color = color_to_native(230, 210, 110)
                     end
 
                     if selected_special == aux_info.track then
@@ -1331,6 +1335,38 @@ function main()
                         selected_track = nil
                     end
                     ImGui.PopStyleColor(ctx)
+
+                    if aux_info.type == "notes" then
+                        ImGui.SameLine(ctx)
+                        ImGui.SetCursorPosX(ctx, 60)
+                        ImGui.TextDisabled(ctx, "Note items only (no audio)")
+                        ImGui.SameLine(ctx)
+                        local changed_notes_tcp, new_notes_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. idx,
+                            aux_submix_tcp_visible[idx])
+                        if changed_notes_tcp then
+                            aux_submix_tcp_visible[idx] = new_notes_tcp
+                            SetMediaTrackInfo_Value(aux_info.track, "B_SHOWINTCP", new_notes_tcp and 1 or 0)
+                            TrackList_AdjustWindows(false)
+                            UpdateArrange()
+                            SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. aux_guid,
+                                new_notes_tcp and "1" or "0")
+                        end
+                        if ImGui.IsItemHovered(ctx) then
+                            ImGui.SetTooltip(ctx, "Show in TCP")
+                        end
+                        ImGui.SameLine(ctx)
+                        if ImGui.Button(ctx, "✕##specialdelete") then
+                            DeleteTrack(aux_info.track)
+                            init()
+                            ImGui.PopID(ctx)
+                            break
+                        end
+                        if ImGui.IsItemHovered(ctx) then
+                            ImGui.SetTooltip(ctx, "Delete this track")
+                        end
+                        ImGui.PopID(ctx)
+                        goto continue_special
+                    end
 
                     local can_rename = (aux_info.type == "aux" or aux_info.type == "submix" or aux_info.type == "reference")
 
@@ -1801,6 +1837,7 @@ function main()
                     end
 
                     ImGui.PopID(ctx)
+                    ::continue_special::
                 end
             end
         end
@@ -1851,7 +1888,9 @@ function main()
             local has_live = false
             local has_listenback = false
             local has_playback = false
+            local has_notes = false
             for _, track_info in ipairs(aux_submix_tracks) do
+                if track_info.type == "notes" then has_notes = true end
                 if track_info.type == "roomtone" then has_roomtone = true end
                 if track_info.type == "live" then has_live = true end
                 if track_info.type == "listenback" then has_listenback = true end
@@ -1866,7 +1905,8 @@ function main()
                     reference = 0,
                     live = 0,
                     listenback = 0,
-                    playback_hw = 0
+                    playback_hw = 0,
+                    notes = 0
                 }
             end
 
@@ -1971,6 +2011,24 @@ function main()
                 end
             end
 
+            if has_notes then
+                ImGui.BeginDisabled(ctx)
+                ImGui.Text(ctx, "Notes:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.TextDisabled(ctx, "(already exists)")
+                ImGui.EndDisabled(ctx)
+            else
+                ImGui.Text(ctx, "Notes:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.SetNextItemWidth(ctx, 100)
+                local changed, new_val = ImGui.InputInt(ctx, "##notes_track", add_special_counts.notes)
+                if changed then
+                    add_special_counts.notes = math.max(0, math.min(1, new_val))
+                end
+            end
+
             ImGui.Separator(ctx)
 
             if ImGui.Button(ctx, "OK", 100, 0) then
@@ -2055,6 +2113,17 @@ function main()
                         end
                         Undo_EndBlock("Add Playback Track", -1)
                     end
+                end
+
+                if not has_notes and add_special_counts.notes > 0 then
+                    Undo_BeginBlock()
+                    notes_track.create()
+                    if workflow == "Vertical" then
+                        dofile(script_path .. "lib/ReaClassical_Vertical Workflow.lua")
+                    else
+                        dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
+                    end
+                    Undo_EndBlock("Add Notes Track", -1)
                 end
 
                 init()
@@ -2283,11 +2352,12 @@ function get_special_tracks()
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
+        local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
             or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
-            or playback_state == "y" then
+            or playback_state == "y" or notes_state == "y" then
             local track_type = "other"
             local has_routing = false
 
@@ -2309,6 +2379,8 @@ function get_special_tracks()
                 track_type = "rcmaster"
             elseif playback_state == "y" then
                 track_type = "playback"
+            elseif notes_state == "y" then
+                track_type = "notes"
             end
 
             local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
@@ -2328,7 +2400,7 @@ function get_special_tracks()
                 display_name = ""
             elseif track_type == "rcmaster" then
                 display_name = ""
-            elseif track_type == "playback" then
+            elseif track_type == "playback" or track_type == "notes" then
                 display_name = ""
             else
                 display_name = name:gsub("%-$", "")
@@ -2354,7 +2426,8 @@ function get_special_tracks()
         live = 5,
         reference = 6,
         listenback = 7,
-        playback = 8
+        playback = 8,
+        notes = 9
     }
 
     table.sort(tracks, function(a, b)
@@ -3697,6 +3770,8 @@ if GetToggleCommandState(1156) ~= 1 then
 end
 
 sync()
+notes_track.enforce(true)
+
 if init() then
     maybe_autofocus_track1()
     defer(main)

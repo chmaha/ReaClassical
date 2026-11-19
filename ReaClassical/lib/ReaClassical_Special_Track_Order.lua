@@ -49,6 +49,8 @@ local function classify(track)
         return "listenback"
     elseif ext(track, "playback") == "y" or name:match("^PLAYBACK") then
         return "playback"
+    elseif ext(track, "notes") == "y" or name:match("^NOTES") then
+        return "notes"
     end
     return nil
 end
@@ -76,6 +78,7 @@ function M.reorder()
     local rcmaster_track = nil
     local m_tracks, routing_tracks, roomtone_tracks = {}, {}, {}
     local live_tracks, ref_tracks, listenback_tracks, playback_tracks = {}, {}, {}, {}
+    local notes_tracks = {}
 
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
@@ -96,6 +99,8 @@ function M.reorder()
             listenback_tracks[#listenback_tracks + 1] = track
         elseif kind == "playback" then
             playback_tracks[#playback_tracks + 1] = track
+        elseif kind == "notes" then
+            notes_tracks[#notes_tracks + 1] = track
         end
     end
 
@@ -132,6 +137,11 @@ function M.reorder()
     Main_OnCommand(40297, 0)
 
     Main_OnCommand(40297, 0)
+    for _, t in ipairs(notes_tracks) do SetTrackSelected(t, true) end
+    ReorderSelectedTracks(CountTracks(0), 0)
+    Main_OnCommand(40297, 0)
+
+    Main_OnCommand(40297, 0)
     for _, t in ipairs(listenback_tracks) do SetTrackSelected(t, true) end
     ReorderSelectedTracks(CountTracks(0), 0)
     Main_OnCommand(40297, 0)
@@ -143,7 +153,7 @@ function M.reorder()
 
     if APIExists("clara_outputMessage") then
         local visible_groups = { m_tracks, routing_tracks, roomtone_tracks,
-                                 live_tracks, ref_tracks }
+                                 live_tracks, ref_tracks, notes_tracks }
         for _, group in ipairs(visible_groups) do
             for _, t in ipairs(group) do
                 SetMediaTrackInfo_Value(t, "B_SHOWINTCP", 1)

@@ -118,11 +118,12 @@ function M.get_special_tracks()
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
+        local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
             or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
-            or playback_state == "y" then
+            or playback_state == "y" or notes_state == "y" then
             local track_type = "other"
             local has_routing = false
 
@@ -144,6 +145,8 @@ function M.get_special_tracks()
                 track_type = "rcmaster"
             elseif playback_state == "y" then
                 track_type = "playback"
+            elseif notes_state == "y" then
+                track_type = "notes"
             end
 
             local _, rcm_disconnect = GetSetMediaTrackInfo_String(track, "P_EXT:rcm_disconnect", "", false)
@@ -162,7 +165,7 @@ function M.get_special_tracks()
                 display_name = ""
             elseif track_type == "rcmaster" then
                 display_name = ""
-            elseif track_type == "playback" then
+            elseif track_type == "playback" or track_type == "notes" then
                 display_name = ""
             else
                 display_name = name:gsub("%-$", "")
@@ -188,7 +191,8 @@ function M.get_special_tracks()
         live = 5,
         reference = 6,
         listenback = 7,
-        playback = 8
+        playback = 8,
+        notes = 9
     }
 
     table.sort(tracks, function(a, b)
@@ -251,6 +255,7 @@ function M.build_track_table(is_empty)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
+        local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         if parent == 1 then
             if j > 1 and k ~= prev_k then
@@ -292,6 +297,9 @@ function M.build_track_table(is_empty)
         elseif M.trackname_check(track, "^PLAYBACK") or playback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:playback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "PLAYBACK", true)
+        elseif M.trackname_check(track, "^NOTES") or notes_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:notes", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "NOTES", true)
         elseif M.trackname_check(track, "^RCMASTER") or rcmaster_state == "y" then
             rcmaster_index = i
         else

@@ -126,14 +126,15 @@ function solo()
         local ref_state = t.rcref
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
+        local notes_state = t.notes
 
         local special_states = mixer_state or aux_state or submix_state
             or rt_state or ref_state or live_state or rcmaster_state
-            or playback_state
+            or playback_state or notes_state
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
             or trackname_check(track, "^LIVE") or trackname_check(track, "^REF")
-            or trackname_check(track, "^PLAYBACK")
+            or trackname_check(track, "^PLAYBACK") or trackname_check(track, "^NOTES")
 
         if special_states or special_names then
             local num_of_sends = GetTrackNumSends(track, 0)

@@ -33,7 +33,7 @@ local main
 local format_peak, format_mute_solo, announce_track, get_feed_track
 local get_visible_special_tracks, announce_special_track, apply_solo_for_special
 
-local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "rcmaster", "playback" }
+local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "rcmaster", "playback", "notes" }
 
 function get_visible_special_tracks()
     local list = {}

@@ -105,6 +105,7 @@ local ADD_REMOVE_TYPES = {
     { type = "live",        label = "Live",        add_cmd = "addlive", rm_cmd = "rmlive", singleton = true },
     { type = "listenback",  label = "Listenback",  add_channel_prefix = "addlb=", rm_cmd = "rmlb", singleton = true },
     { type = "playback",    label = "Playback",    add_channel_prefix = "addpb=", rm_cmd = "rmpb", singleton = true },
+    { type = "notes",       label = "Notes",       add_cmd = "addnotes", rm_cmd = "rmnotes", singleton = true },
 }
 
 local state       = STATE_MENU

@@ -24,7 +24,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 
 local M = {}
 
-local SPECIAL_KEYS = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback" }
+local SPECIAL_KEYS = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback", "notes" }
 
 local function is_special_track(track)
     for _, key in ipairs(SPECIAL_KEYS) do
