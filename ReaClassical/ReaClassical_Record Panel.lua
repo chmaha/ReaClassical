@@ -62,7 +62,7 @@ local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_pref
 local load_item_rank_and_notes, save_item_rank_and_notes, rgba_to_native, update_take_name
 local apply_rank_and_notes_to_items, store_last_recorded_guids, apply_rank_and_notes_by_guids
 local apply_rank_and_notes_to_item, find_first_folder_track, get_folder_items_at_midpoint
-local armed_tracks_have_input
+local armed_tracks_have_input, add_rank_marker
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
@@ -84,6 +84,8 @@ end
 
 local auto_color_pref = 0
 local ranking_color_pref = 0
+local RANK_MARKER_CMD = 43158
+local RANK_MARKER_OFFSET = 2
 
 function check_prefs()
   local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -674,6 +676,16 @@ function save_item_rank_and_notes(item, rank, note)
   end
 
   UpdateArrange()
+end
+
+function add_rank_marker()
+  local play_state = GetPlayState()
+  local active = (play_state & 1) == 1 or (play_state & 4) == 4
+  local original_cursor = GetCursorPosition()
+  local pos = active and math.max(GetPlayPosition() - RANK_MARKER_OFFSET, 0) or original_cursor
+  SetEditCurPos(pos, false, false)
+  Main_OnCommand(RANK_MARKER_CMD, 0)
+  SetEditCurPos(original_cursor, false, false)
 end
 
 function get_take_count(session_name)
@@ -1345,6 +1357,13 @@ function draw(playstate)
   end
   ImGui.PopStyleColor(ctx)
 
+  ImGui.SameLine(ctx, 0, button_spacing)
+  if ImGui.Button(ctx, "Mark Blemish", total_button_width / 2 - button_spacing) then
+    add_rank_marker()
+  end
+  ImGui.SetItemTooltip(ctx, "Add a down-rank item marker " .. RANK_MARKER_OFFSET
+    .. " s before the playhead (F10)")
+
   local note_y = rank_y + (25 * scale)
   ImGui.SetCursorPos(ctx, buttons_start_x, note_y)
   local note_height = 40 * scale
@@ -1559,6 +1578,10 @@ function draw(playstate)
   end
 
   if ImGui.IsWindowFocused(ctx) and gui_mode.imgui_close_shortcut(ImGui, ctx) then open = false end
+
+  if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_F10, false) then
+    add_rank_marker()
+  end
 
   if ImGui.IsWindowFocused(ctx) and ImGui.IsKeyPressed(ctx, ImGui.Key_F9, false) then
     local mods = ImGui.GetKeyMods(ctx)
