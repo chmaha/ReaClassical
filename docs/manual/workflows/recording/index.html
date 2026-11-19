@@ -148,6 +148,28 @@
 <p>To set a session name, click the greyed "Session name" text beneath the take number in the Record Panel (only possible while stopped), type a name and press <kbd>Enter</kbd> (or click elsewhere). Press <kbd>Esc</kbd> to cancel. To remove the name, click it, delete the text with backspace and press <kbd>Enter</kbd>. Note that if you create a new session name, the take number will automatically be reset to 1. If you switch to an existing session name with recorded takes, the take number will be calculated accordingly. </p>
 <h4 id="ranking-and-notes">Ranking and Notes</h4>
 <p>During recording, any ranking or notes added will affect the item created immediately after recording finishes. When transport is stopped, if no items are selected, ranking and notes affect the last recorded items. Apply ranking and notes to previous items in the timeline by selecting them. </p>
+<h4 id="marking-blemishes">Marking Blemishes</h4>
+<p>Click <kbd>Mark Blemish</kbd> next to the ranking dropdown, or press <kbd>F10</kbd> while the Record Panel has focus, to add a down-rank item marker at the spot that needs patching. While recording or playing, the marker is placed 2 seconds before the playhead to allow for reaction time. When stopped, it goes at the edit cursor. Because it works from inside the Record Panel, you can keep typing notes and marking problem spots without clicking back into the arrange window.</p>
+<h4 id="global-take-numbers">Global Take Numbers</h4>
+<p>If you organise takes by session name (for example one session per aria or movement) but your video files are numbered across the whole day, enable <strong>Global Take Numbers</strong> in <kbd>F5</kbd> preferences. Each recorded take then also gets a project-wide number, shown in the top-left corner of the Record Panel ("Next global take" while stopped, "Global take" while recording or when editing a selected item). Set the starting number under "Next Global Take Number" in the Record Panel settings, for example to match the camera's next clip number.</p>
+<h4 id="take-sheet">Take Sheet</h4>
+<p>Run <strong>Take Sheet</strong> to export every recorded take together with the edit list. First choose whether to include rankings, notes and item markers. Choose No for a version you can safely send to artists or anyone who shouldn't see your internal comments; its files are named <code>take_sheet_shared…</code> so both versions can sit side by side. Then choose the edit list timing: BWF start offset for timeclock-synced projects (you can then enter an optional frame offset), or source file timing, the same two options as <a href="/manual/workflows/video/">Build Edit List</a>. It writes three files next to the project file and opens the HTML page in your browser:</p>
+<ul>
+<li><code>take_sheet.html</code>: an edit summary, the full edit list and all takes, with links at the top to jump between them</li>
+<li><code>take_sheet_edit_list.csv</code>: the edit list on its own, for the video editor</li>
+<li><code>take_sheet.csv</code>: the takes on its own, for sorting and filtering in a spreadsheet</li>
+</ul>
+<p>In the list of takes, each row is one take, with:</p>
+<ul>
+<li>global take number (if used), session and take number</li>
+<li>ranking and notes</li>
+<li>item markers (such as blemish markers) as times within the take</li>
+<li>duration and BWF recording date/time</li>
+<li>whether the take is used in the edit, and whether it is still in the project</li>
+</ul>
+<p>Takes that are still in the media folder but were deleted from the project are listed too, greyed out. On the HTML page, takes are grouped by session (piece or movement) in sections you can expand and collapse, each showing how many takes it has and how many are used in the edit. You can also show only the takes used in the edit or copy the table as CSV.</p>
+<p>The <strong>Edit Summary</strong> at the top of the page is the easiest view for producers and artists: it lists which take is heard from when to when on the timeline (in minutes and seconds), merging consecutive pieces of the same take.</p>
+<p>The edit list shows each edit in the destination folder, with the same columns as Build Edit List plus a Take column (global take number if used, session and take number), so video editors, producers and artists can all work from one page.</p>
 <h4 id="other-buttons-and-options-in-the-main-window">Other Buttons and Options in the Main Window</h4>
 <p>Click the take number (after confirming) to recalculate the take count, and use the <kbd class="button">Settings</kbd> button for the options described in <a href="#record-panel-settings">Record Panel Settings</a>. Use <kbd>+Take</kbd> (<kbd>Shift+F9</kbd>, also while recording) to quickly increase the take number (useful for a false start, for example). Press <kbd>Next</kbd> (<kbd>Alt+F9</kbd>) to start a new recording section. This means that in vertical workflow the first source folder is rec-armed and in both workflows, the edit cursor is placed 5 seconds after the final item in the project. Enable "Record Takes Horizontally" while in vertical workflow to record takes left to right on a single folder. This is useful, for example, if you prefer to have each folder contain takes for just one piece of music. In this instance, <kbd>Next</kbd> acts as a sort of carriage return and arms the next folder down as well as move the edit cursor to the start of the timeline (or after any existing material). </p>
 <h4 id="record-panel-settings">Record Panel Settings</h4>
@@ -157,6 +179,8 @@
 <p>This setting overrides the default safety feature of only allowing new recorded items after the final item on the folder. This is useful if you record musical material out of order and wish to place new items at an arbitrary position on the project timeline. </p>
 <h5 id="scheduled-recording">Scheduled Recording</h5>
 <p>To start (and optionally end) a recording at specific times or manually start a recording to end at a certain time or after a certain duration, click the <kbd class="button">Settings</kbd> button on the Record Panel window and add the appropriate entry or entries in HH:MM format. After pressing <kbd class="button">Apply</kbd>, the Record Panel window will display information above the take number. If you enter a start or end time earlier or equal to the current time, the function will assume a next day schedule and will annotate the time with an asterisk (*). Likewise, with both a start and end time, if the end time is earlier than or equal to start, it will assume a time 24 hours later. Don't forget to arm your tracks before walking away! </p>
+<h5 id="next-global-take-number">Next Global Take Number</h5>
+<p>Only active when Global Take Numbers is enabled in <kbd>F5</kbd> preferences. Sets the number the next recorded take receives. It is independent of session take numbers and keeps counting across sessions.</p>
 <h5 id="overriding-take-numbers">Overriding Take Numbers</h5>
 <p>You shouldn't need to use this but there are cases where you might want to start a new ReaClassical project but continue from the previous day's last take number. To do so, check the "Allow Take Number Override" option and set a new take number. Note that it will not allow you to set a number lower than already used. </p>
 <h3 id="remote-recording-via-web-interface">Remote Recording via web interface</h3>

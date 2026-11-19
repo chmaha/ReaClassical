@@ -149,10 +149,14 @@
 <dd>By default, when setting source in and out markers, any previously existing ones are deleted. To convert previous pairs to take marker "regions" for use in the source audition manager <kbd>Z</kbd>, set to checked. Default = unchecked.</dd>
 <dt>Marker Offset During Rec/Play (s)</dt>
 <dd>When adding a marker while recording or playing, the marker is placed this many seconds before the current position to allow for reaction time. Set to 0 to disable. Negative values are not allowed. Default = 0.</dd>
+<dt>Play Edit After Making It</dt>
+<dd>After an S-D edit (<kbd>5</kbd>), a timestretched replace edit (<kbd>F4</kbd>) or a 3-point insert edit (<kbd>F3</kbd>), ReaClassical moves the edit cursor 3 seconds before the edit point and starts playback so you can review the edit and its crossfades straight away. Playback keeps running until you stop it. In multi-tab editing, a 3-point insert edit switches to the destination tab to play. Default = unchecked.</dd>
+<dt>Global Take Numbers</dt>
+<dd>Adds a project-wide take counter alongside the session take numbers. Every recorded take gets the next global number, whatever its session, which helps keep audio takes in step with globally numbered video files. The number is shown in the top-left corner of the Record Panel, can be set in Record Panel settings, and appears in the <a href="/manual/workflows/recording/#take-sheet">take sheet</a>. It is stored with each item and does not change file or item names. Default = unchecked.</dd>
 </dl>
 <div class="admonition accessibility">
 <p class="admonition-title">Screen reader users (Clara)</p>
-<p>Accessible Preferences offers the same sixteen options as a keyboard-driven list: Up and Down move between options, Enter edits, Backspace resets the current option to its default and Escape closes. A "Reset All to Defaults" row restores everything. An additional "Other Settings" row holds three accessibility-oriented values: the marker/item nudge amount in milliseconds, the item edge grow/shrink amount in milliseconds (default 500) and the modifier multiplier applied by the "x modifier" versions of the nudge and grow/shrink actions.</p>
+<p>Accessible Preferences offers the same eighteen options as a keyboard-driven list: Up and Down move between options, Enter edits, Backspace resets the current option to its default and Escape closes. A "Reset All to Defaults" row restores everything. An additional "Other Settings" row holds three accessibility-oriented values: the marker/item nudge amount in milliseconds, the item edge grow/shrink amount in milliseconds (default 500) and the modifier multiplier applied by the "x modifier" versions of the nudge and grow/shrink actions.</p>
 </div>
 
 				<div class="clear"></div>
