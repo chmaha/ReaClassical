@@ -957,25 +957,6 @@ function draw(playstate)
     end
   end
 
-  if global_take.enabled() then
-    local global_label
-    local editing_global = editing_item and ValidatePtr2(0, editing_item, "MediaItem*")
-        and global_take.get(editing_item)
-    if playstate == 0 and editing_global then
-      global_label = "Global take " .. editing_global
-    elseif playstate == 5 or playstate == 6 then
-      global_label = "Global take " .. global_take.get_next()
-    else
-      global_label = "Next global take " .. global_take.get_next()
-    end
-    ImGui.PushFont(ctx, small_font, 15 * scale)
-    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xAAAAAAFF)
-    ImGui.SetCursorPos(ctx, 10 * scale, 10 * scale)
-    ImGui.Text(ctx, global_label)
-    ImGui.PopStyleColor(ctx)
-    ImGui.PopFont(ctx)
-  end
-
   ImGui.PushFont(ctx, large_font, 175 * scale)
   local take_str = tostring(take_text)
   local text_w, text_h = ImGui.CalcTextSize(ctx, take_str)
@@ -998,6 +979,49 @@ function draw(playstate)
   ImGui.Text(ctx, take_str)
   ImGui.PopStyleColor(ctx)
   ImGui.PopFont(ctx)
+
+  local button_width = 60 * scale
+  local button_height = 25 * scale
+  local button_spacing = 5 * scale
+  local total_button_width = (button_width * 4) + (button_spacing * 3)
+  local buttons_start_x = (win_w - total_button_width) / 2
+
+  if global_take.enabled() then
+    local global_num, global_tip
+    local showing_item = playstate == 0 and editing_item and take_extracted
+        and ValidatePtr2(0, editing_item, "MediaItem*")
+    if showing_item then
+      global_num = global_take.get(editing_item)
+      global_tip = "Global take number of this item"
+    elseif playstate == 5 or playstate == 6 then
+      global_num = global_take.get_next()
+      global_tip = "Global take number being recorded"
+    else
+      global_num = global_take.get_next()
+      global_tip = "Next global take number"
+    end
+    if global_num then
+      local global_str = tostring(global_num)
+      local min_x = take_x + text_w + 8 * scale
+      local max_right = win_w - 10 * scale
+      local global_size = 55 * scale
+      ImGui.PushFont(ctx, large_font, global_size)
+      local global_w = ImGui.CalcTextSize(ctx, global_str)
+      if min_x + global_w > max_right then
+        ImGui.PopFont(ctx)
+        global_size = math.max(global_size * (max_right - min_x) / global_w, 20 * scale)
+        ImGui.PushFont(ctx, large_font, global_size)
+        global_w = ImGui.CalcTextSize(ctx, global_str)
+      end
+      ImGui.PushStyleColor(ctx, ImGui.Col_Text, (take_color & 0xFFFFFF00) | 0xB0)
+      local global_x = math.max(buttons_start_x + total_button_width - global_w, min_x)
+      ImGui.SetCursorPos(ctx, global_x, take_y + text_h * 0.12)
+      ImGui.Text(ctx, global_str)
+      ImGui.PopStyleColor(ctx)
+      ImGui.PopFont(ctx)
+      if ImGui.IsItemHovered(ctx) then ImGui.SetTooltip(ctx, global_tip) end
+    end
+  end
 
   if playstate == 5 or playstate == 6 then
     local indicator_x = win_x + 50 * scale
@@ -1113,12 +1137,6 @@ function draw(playstate)
       ImGui.SetMouseCursor(ctx, ImGui.MouseCursor_Hand)
     end
   end
-
-  local button_width = 60 * scale
-  local button_height = 25 * scale
-  local button_spacing = 5 * scale
-  local total_button_width = (button_width * 4) + (button_spacing * 3)
-  local buttons_start_x = (win_w - total_button_width) / 2
 
   local button_y = take_y + text_h + (10 * scale) + session_h + (5 * scale)
 
