@@ -47,7 +47,7 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,0,0,0,0.75,' .. year .. ',WAV,0,0,0,0,0'
+local default_values = '35,200,3,7,0,0,0,0,0.75,' .. year .. ',WAV,0,0,0,0,0,0,0'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade Length (ms)',
@@ -65,10 +65,12 @@ local labels = {
     'Find Takes Using Item Names',
     'Show Only Item Take Numbers',
     'Source Audition Mode',
-    'Marker Offset During Rec/Play (s)'
+    'Marker Offset During Rec/Play (s)',
+    'Play Edit After Making It',
+    'Global Take Numbers'
 }
 
-local binary_options = { 5, 6, 7, 8, 12, 13, 14, 15 }
+local binary_options = { 5, 6, 7, 8, 12, 13, 14, 15, 17, 18 }
 
 local ctx = ImGui.CreateContext('ReaClassical Preferences')
 local visible = true
@@ -284,8 +286,14 @@ function load_prefs()
 
     if saved ~= "" then
         local count = select(2, saved:gsub(",", ",")) + 1
-        if count == NUM_OF_ENTRIES - 1 then
-            saved = saved .. ",2"
+        if count >= 15 and count < NUM_OF_ENTRIES then
+            local default_entries = {}
+            for entry in default_values:gmatch('([^,]+)') do
+                default_entries[#default_entries + 1] = entry
+            end
+            for i = count + 1, NUM_OF_ENTRIES do
+                saved = saved .. "," .. (i == 16 and "2" or default_entries[i])
+            end
         elseif count ~= NUM_OF_ENTRIES then
             saved = default_values
         end
@@ -378,6 +386,8 @@ function pref_check()
         local num_13 = tonumber(t[13])
         local num_14 = tonumber(t[14])
         local num_15 = tonumber(t[15])
+        local num_17 = tonumber(t[17])
+        local num_18 = tonumber(t[18])
 
         t[11]              = tostring(t[11]):upper()
         local audio_format = t[11]
@@ -389,7 +399,9 @@ function pref_check()
             (num_12 and num_12 > 1) or
             (num_13 and num_13 > 1) or
             (num_14 and num_14 > 1) or
-            (num_15 and num_15 > 1) then
+            (num_15 and num_15 > 1) or
+            (num_17 and num_17 > 1) or
+            (num_18 and num_18 > 1) then
             binary_error_msg = "Binary option entries must be set to 0 or 1.\n"
             pass = false
         end

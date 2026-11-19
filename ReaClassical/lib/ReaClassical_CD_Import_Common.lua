@@ -162,15 +162,18 @@ function M.run(opts)
         Main_OnCommand(40691, 0)
     end
 
-    local PREF_N = 16
+    local PREF_N = 18
     local pref_year = os.date("%Y")
-    local pref_default = "35,200,3,7,0,0,0,0,0.75," .. pref_year .. ",WAV,0,0,0,0,2"
+    local pref_default = "35,200,3,7,0,0,0,0,0.75," .. pref_year .. ",WAV,0,0,0,0,2,0,0"
+    local default_entries = {}
+    for v in pref_default:gmatch("([^,]+)") do default_entries[#default_entries + 1] = v end
     local _, saved_prefs = GetProjExtState(0, "ReaClassical", "Preferences")
-    if saved_prefs == "" or select(2, saved_prefs:gsub(",", ",")) + 1 ~= PREF_N then
-        saved_prefs = pref_default
-    end
     local pref_entries = {}
     for v in saved_prefs:gmatch("([^,]+)") do pref_entries[#pref_entries + 1] = v end
+    if #pref_entries < 15 or #pref_entries > PREF_N then
+        pref_entries = default_entries
+    end
+    for i = #pref_entries + 1, PREF_N do pref_entries[i] = default_entries[i] end
     pref_entries[2] = "0"
     SetProjExtState(0, "ReaClassical", "Preferences", table.concat(pref_entries, ","))
 

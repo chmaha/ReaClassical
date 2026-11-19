@@ -43,12 +43,13 @@ local PREF_LABELS = {
     "Reference Tracks Are Overdub Guides", "Add S-D Markers at Mouse Hover", "Alternate Audition Playback Rate",
     "Year of Production", "CUE Audio Format", "Floating Destination Folder",
     "Find Takes Using Item Names", "Show Only Item Take Numbers", "Source Audition Mode",
-    "Marker Offset During Record or Play in Seconds",
+    "Marker Offset During Record or Play in Seconds", "Play Edit After Making It",
+    "Global Take Numbers",
 }
 local PREF_BINARY = { [5] = true, [6] = true, [7] = true, [8] = true,
-    [12] = true, [13] = true, [14] = true, [15] = true }
+    [12] = true, [13] = true, [14] = true, [15] = true, [17] = true, [18] = true }
 local PREF_FORMATS = { "WAV", "FLAC", "MP3", "AIFF" }
-local PREF_DEFAULTS = "35,200,3,7,0,0,0,0,0.75," .. os.date("%Y") .. ",WAV,0,0,0,0,2"
+local PREF_DEFAULTS = "35,200,3,7,0,0,0,0,0.75," .. os.date("%Y") .. ",WAV,0,0,0,0,2,0,0"
 
 local PREF_DEFAULT_VALUES = {}
 
@@ -80,8 +81,12 @@ local function load_prefs()
     if saved == "" then saved = PREF_DEFAULTS end
     local entries = {}
     for entry in saved:gmatch("([^,]+)") do entries[#entries + 1] = entry end
-    if #entries == #PREF_LABELS - 1 then
-        entries[#entries + 1] = "2"
+    if #entries >= 15 and #entries < #PREF_LABELS then
+        local defaults = {}
+        for entry in PREF_DEFAULTS:gmatch("([^,]+)") do defaults[#defaults + 1] = entry end
+        for i = #entries + 1, #PREF_LABELS do
+            entries[i] = defaults[i]
+        end
     elseif #entries ~= #PREF_LABELS then
         saved = PREF_DEFAULTS
         entries = {}
