@@ -41,7 +41,7 @@ local format_pan, sync, auto_assign, reorder_track, delete_mixer_track
 local add_mixer_track, init, draw_track_controls
 local consolidate_folders_to_first, get_hardware_outputs
 local check_dolby_atmos_beam_available, get_track_num_channels
-local get_items_at_midpoint
+local get_items_at_midpoint, set_folder_tcp_visible, set_destination_only
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
@@ -1240,30 +1240,37 @@ function main()
                     local changed, new_state = ImGui.Checkbox(ctx, folder_info.prefix, folder_tcp_visible[i])
 
                     if changed then
-                        folder_tcp_visible[i] = new_state
-
-                        SetMediaTrackInfo_Value(folder_info.track, "B_SHOWINTCP", new_state and 1 or 0)
-
-                        local folder_idx = folder_info.index
-                        local child_idx = folder_idx + 1
-                        local depth = 1
-
-                        while child_idx < CountTracks(0) and depth > 0 do
-                            local child_track = GetTrack(0, child_idx)
-                            local child_depth = GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
-
-                            SetMediaTrackInfo_Value(child_track, "B_SHOWINTCP", new_state and 1 or 0)
-
-                            depth = depth + child_depth
-                            child_idx = child_idx + 1
-                        end
-
+                        set_folder_tcp_visible(i, new_state)
                         TrackList_AdjustWindows(false)
                         UpdateArrange()
-
-                        SetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. folder_info.guid,
-                            new_state and "1" or "0")
                     end
+                end
+
+                ImGui.Separator(ctx)
+                if ImGui.Button(ctx, "Destination Only") then
+                    set_destination_only(true)
+                end
+                if ImGui.IsItemHovered(ctx) then
+                    ImGui.SetTooltip(ctx, "Hide all source folders and apply the destination track height")
+                end
+                ImGui.SameLine(ctx)
+                if ImGui.Button(ctx, "Show All") then
+                    set_destination_only(false)
+                end
+                if ImGui.IsItemHovered(ctx) then
+                    ImGui.SetTooltip(ctx, "Show all folders and restore destination track heights")
+                end
+
+                local _, height_str = GetProjExtState(0, "ReaClassical_MissionControl", "dest_only_height")
+                local dest_height = tonumber(height_str) or 0
+                ImGui.SetNextItemWidth(ctx, 100)
+                local height_changed, new_height = ImGui.InputInt(ctx, "D: track height (px)", dest_height, 10, 50)
+                if height_changed then
+                    new_height = math.max(0, math.min(new_height, 2000))
+                    SetProjExtState(0, "ReaClassical_MissionControl", "dest_only_height", tostring(new_height))
+                end
+                if ImGui.IsItemHovered(ctx) then
+                    ImGui.SetTooltip(ctx, "Height applied to destination tracks by Destination Only (0 = unchanged)")
                 end
 
                 ImGui.EndPopup(ctx)
@@ -3526,6 +3533,65 @@ function get_track_num_channels(track)
         num_channels = 2
     end
     return num_channels
+end
+
+function set_folder_tcp_visible(i, state)
+    local folder_info = folder_tracks[i]
+    if not folder_info or not ValidatePtr(folder_info.track, "MediaTrack*") then return end
+    folder_tcp_visible[i] = state
+
+    SetMediaTrackInfo_Value(folder_info.track, "B_SHOWINTCP", state and 1 or 0)
+
+    local child_idx = folder_info.index + 1
+    local depth = 1
+    while child_idx < CountTracks(0) and depth > 0 do
+        local child_track = GetTrack(0, child_idx)
+        SetMediaTrackInfo_Value(child_track, "B_SHOWINTCP", state and 1 or 0)
+        depth = depth + GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
+        child_idx = child_idx + 1
+    end
+
+    SetProjExtState(0, "ReaClassical_MissionControl", "folder_tcp_visible_" .. folder_info.guid,
+        state and "1" or "0")
+end
+
+function set_destination_only(dest_only)
+    local _, height_str = GetProjExtState(0, "ReaClassical_MissionControl", "dest_only_height")
+    local dest_height = tonumber(height_str) or 0
+
+    for i, folder_info in ipairs(folder_tracks) do
+        local is_dest = folder_info.prefix == "D"
+        set_folder_tcp_visible(i, dest_only and is_dest or not dest_only)
+
+        if is_dest and ValidatePtr(folder_info.track, "MediaTrack*") then
+            local dest_tracks = { folder_info.track }
+            local child_idx = folder_info.index + 1
+            local depth = 1
+            while child_idx < CountTracks(0) and depth > 0 do
+                local child_track = GetTrack(0, child_idx)
+                dest_tracks[#dest_tracks + 1] = child_track
+                depth = depth + GetMediaTrackInfo_Value(child_track, "I_FOLDERDEPTH")
+                child_idx = child_idx + 1
+            end
+
+            for _, track in ipairs(dest_tracks) do
+                local _, saved = GetSetMediaTrackInfo_String(track, "P_EXT:rc_prev_height", "", false)
+                if dest_only and dest_height > 0 then
+                    if saved == "" then
+                        local current = GetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE")
+                        GetSetMediaTrackInfo_String(track, "P_EXT:rc_prev_height", tostring(current), true)
+                    end
+                    SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", dest_height)
+                elseif not dest_only and saved ~= "" then
+                    SetMediaTrackInfo_Value(track, "I_HEIGHTOVERRIDE", tonumber(saved) or 0)
+                    GetSetMediaTrackInfo_String(track, "P_EXT:rc_prev_height", "", true)
+                end
+            end
+        end
+    end
+
+    TrackList_AdjustWindows(false)
+    UpdateArrange()
 end
 
 function get_items_at_midpoint(ref_item, folder_start, folder_end)
