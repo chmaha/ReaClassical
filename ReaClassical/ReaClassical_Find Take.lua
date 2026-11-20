@@ -89,6 +89,32 @@ function main()
 
     local num_of_items = CountMediaItems(0)
 
+    local function select_found(item)
+        local item_start = GetMediaItemInfo_Value(item, "D_POSITION")
+        SetEditCurPos(item_start, true, false)
+        Main_OnCommand(40769, 0)
+        SetMediaItemSelected(item, true)
+        select_midpoint_peers(GetMediaItemTrack(item))
+        found_item = item
+    end
+
+    local function search_global(global_num, ignore_edit)
+        for i = 0, num_of_items - 1 do
+            local item = GetMediaItem(0, i)
+            local _, stored = GetSetMediaItemInfo_String(item, "P_EXT:global_take", "", false)
+            if tonumber(stored) == global_num then
+                local edit = GetSetMediaItemInfo_String(item, "P_EXT:SD", "", false)
+                if ignore_edit or not edit then
+                    select_found(item)
+                    local _, take_num = GetSetMediaItemInfo_String(item, "P_EXT:item_take_num", "", false)
+                    found_take_num = tonumber(take_num)
+                    return true
+                end
+            end
+        end
+        return false
+    end
+
     local function search(ignore_edit)
         for i = 0, num_of_items - 1 do
             local item = GetMediaItem(0, i)
@@ -206,21 +232,29 @@ function main()
 
     while true do
         local retval, inputs = GetUserInputs(
-            'Find Take', 2, 'Take Number:,Session Name (optional):', ',' .. session_name)
+            'Find Take', 2, 'Take Number (G42 = global):,Session Name (optional):', ',' .. session_name)
         if not retval then return end
 
-        take_choice, session_name = inputs:match("([^,]*),([^,]*)")
-        take_choice = tonumber(take_choice)
-        if not take_choice and session_name ~= "" then take_choice = 1 end
+        local raw_take
+        raw_take, session_name = inputs:match("([^,]*),([^,]*)")
+        local global_num = tonumber(raw_take:match("^%s*[Gg]%s*(%d+)%s*$"))
+        take_choice = tonumber(raw_take)
+        if not take_choice and not global_num and session_name ~= "" then take_choice = 1 end
 
         session_name = session_name:match("^%s*(.-)%s*$")
         SetProjExtState(0, "ReaClassical", "SessionNameSearch", session_name)
 
-        local found = search(false) or search(true)
+        local found
+        if global_num then
+            found = search_global(global_num, false) or search_global(global_num, true)
+        else
+            found = search(false) or search(true)
+        end
 
-        if not found and (take_choice or session_name ~= "") then
-            say("Take not found")
-            local response = MB("Take not found. Try again?", "Find Take", 4)
+        if not found and (take_choice or global_num or session_name ~= "") then
+            local not_found = global_num and ("Global take " .. global_num .. " not found") or "Take not found"
+            say(not_found)
+            local response = MB(not_found .. ". Try again?", "Find Take", 4)
             if response ~= 6 then
                 break
             end
@@ -235,7 +269,9 @@ function main()
                 if take then
                     _, take_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
                 end
-                say(humanize_take_phrase(take_name, found_take_num) .. rank_info.rank_announce_suffix(found_item)
+                local global_prefix = global_num and ("Global take " .. global_num .. ", ") or ""
+                say(global_prefix .. humanize_take_phrase(take_name, found_take_num)
+                    .. rank_info.rank_announce_suffix(found_item)
                     .. " found" .. (label ~= "" and (" in " .. label) or ""))
             end
             break
