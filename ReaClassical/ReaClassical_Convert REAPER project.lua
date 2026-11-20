@@ -25,149 +25,185 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local _gm_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. _gm_path .. "?.lua;" .. _gm_path .. "lib/?.lua;"
 local gui_mode = require("ReaClassical_GuiMode")
-local main, duplicate_project_in_new_tab, flatten_all_folders
-local make_all_tracks_one_folder, delete_empty_tracks, reset_all_routing
-local add_rc_ext_state, tag_source_tracks
+local convert = require("ReaClassical_Convert_Core")
 
-function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow ~= "" then
-        MB("This is already a ReaClassical project.", "ReaClassical Conversion", 0)
+local _clara_or_debug = not _G.RC_SCRIPT_ARGS and gui_mode.accessible()
+if _clara_or_debug then
+    dofile(_gm_path .. "lib/ReaClassical_Accessible Convert REAPER Project.lua")
+    return
+end
+
+if not APIExists("ImGui_GetVersion") then
+    MB('Please install reaimgui extension before running this function', 'Error: Missing Extension', 0)
+    return
+end
+
+set_action_options(2)
+package.path = ImGui_GetBuiltinPath() .. '/?.lua'
+local ImGui = require 'imgui' '0.10'
+
+local WINDOW_TITLE = "ReaClassical Conversion"
+local MISSION_CONTROL_CMD = "_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c"
+local WINDOW_WIDTH = 520
+local LEAVE_LABEL = "Leave in place"
+
+local OPTIONS = {
+    {
+        label = "Microphones of one recording",
+        sequential = false,
+        detail = "The tracks become one folder with a track per microphone. "
+            .. "Existing markers and regions stay where they are.",
+    },
+    {
+        label = "Separate material",
+        sequential = true,
+        detail = "Each track holds different material (separate pieces, takes or versions). "
+            .. "The tracks are placed one after another, left to right, in a single-track folder, "
+            .. "with a marker named after each original track. "
+            .. "Track FX and automation are kept from the first track only.",
+    },
+}
+
+local ctx = ImGui.CreateContext(WINDOW_TITLE)
+local window_open = true
+local frame_count = 0
+
+local state, message
+local pending = nil
+local converted = false
+local tracks_with_items, has_markers, tracks, marker_choice
+
+local function marker_choice_label(n)
+    return tracks[n] and tracks[n].name or LEAVE_LABEL
+end
+
+local function start_conversion(sequential, marker_track_index)
+    local ok, msg = convert.run(sequential, marker_track_index)
+    if ok then
+        converted = true
+        window_open = false
+    else
+        state, message = "error", msg
+    end
+end
+
+if convert.is_rc_project() then
+    state, message = "error", "This is already a ReaClassical project."
+elseif convert.save_problem() then
+    state, message = "error", convert.save_problem()
+else
+    tracks_with_items = convert.count_tracks_with_items()
+    has_markers = convert.has_markers()
+    tracks = convert.tracks_with_items()
+    marker_choice = has_markers and convert.default_marker_track(tracks) or 1
+    state = "choose"
+end
+
+local function draw_wrapped(text)
+    ImGui.TextWrapped(ctx, text)
+end
+
+local function queue(sequential, marker_track_index)
+    pending = { sequential = sequential, marker_track_index = marker_track_index, frame = frame_count }
+    state, message = "working", "Converting..."
+end
+
+local function draw_choose()
+    draw_wrapped(convert.INFO)
+    ImGui.Spacing(ctx)
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
+    if tracks_with_items < 2 then
+        if ImGui.Button(ctx, "Convert", 120, 0) then queue(false) end
+        ImGui.SameLine(ctx)
+        if ImGui.Button(ctx, "Cancel", 80, 0) then window_open = false end
         return
     end
-    PreventUIRefresh(1)
-    local ret = duplicate_project_in_new_tab()
-    if ret == -1 then return end
-    flatten_all_folders()
-    delete_empty_tracks()
-    reset_all_routing()
-    make_all_tracks_one_folder()
-    tag_source_tracks()
-    add_rc_ext_state()
-    local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
-    dofile(script_path .. "lib/ReaClassical_Horizontal Workflow.lua")
-    dofile(script_path .. "ReaClassical_Auto-color project.lua")
-    Main_SaveProject(0, false)
-    PreventUIRefresh(-1)
-    MB("Your project has been converted.\n\n"
-        .. "Any folders have been flattened, empty tracks removed "
-        .. "and a single folder created for horizontal workflow.\n"
-        .. "Any regular track FX from your original project have been "
-        .. "placed onto the ReaClassical mixer tracks.\n"
-        .. "Recreate any custom routing and bus FX using ReaClassical's Mission Control."
-        , "ReaClassical Conversion", 0)
-    if not gui_mode.accessible() then
-        local mission_control = NamedCommandLookup("_RScaa05755eb1dca4cec87c8ba9fe0ddf6570ce73c")
-        Main_OnCommand(mission_control, 0)
+    draw_wrapped("This project has " .. tracks_with_items .. " tracks with items. What do they contain?")
+    ImGui.Spacing(ctx)
+    for _, option in ipairs(OPTIONS) do
+        if ImGui.Button(ctx, option.label, 260, 0) then
+            local marker_track_index = nil
+            if option.sequential and tracks[marker_choice] then
+                marker_track_index = tracks[marker_choice].index
+            end
+            queue(option.sequential, marker_track_index)
+        end
+        ImGui.PushStyleColor(ctx, ImGui.Col_Text, ImGui.GetStyleColor(ctx, ImGui.Col_TextDisabled))
+        ImGui.TextWrapped(ctx, option.detail)
+        ImGui.PopStyleColor(ctx)
+        if option.sequential and has_markers then
+            ImGui.AlignTextToFramePadding(ctx)
+            ImGui.Text(ctx, "Existing markers and regions belong to:")
+            ImGui.SameLine(ctx)
+            ImGui.SetNextItemWidth(ctx, 200)
+            if ImGui.BeginCombo(ctx, "##marker_track", marker_choice_label(marker_choice)) then
+                for n = 1, #tracks + 1 do
+                    if ImGui.Selectable(ctx, marker_choice_label(n), marker_choice == n) then
+                        marker_choice = n
+                    end
+                end
+                ImGui.EndCombo(ctx)
+            end
+            if ImGui.IsItemHovered(ctx) then
+                ImGui.SetTooltip(ctx, "They move with this track's material")
+            end
+        end
+        ImGui.Spacing(ctx)
     end
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
+    if ImGui.Button(ctx, "Cancel", 80, 0) then window_open = false end
 end
 
-function duplicate_project_in_new_tab()
-    local _, proj_path = EnumProjects(-1, "")
-    local isdirty = IsProjectDirty(0)
-    if not proj_path or proj_path == "" or not proj_path:lower():match("%.rpp$") or isdirty == 1 then
-        MB("Please save the project before duplicating.", "Project Not Saved", 0)
-        return -1
-    end
-
-    Main_OnCommand(40859, 0)
-
-    Main_openProject(proj_path)
-
-    local current_filename, ext = proj_path:match("([^\\/]-)%.([Rr][Pp][Pp])$")
-    current_filename = current_filename or "Untitled"
-    ext = ext or "RPP"
-
-    local dir = proj_path:match("^(.*)[\\/][^\\/]-%.([Rr][Pp][Pp])$") or GetProjectPath("")
-
-    local new_filename = current_filename .. "_converted." .. ext
-    local new_filepath = dir .. "/" .. new_filename
-
-    Main_SaveProjectEx(0, new_filepath, 8)
+local function draw_message()
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFF6666FF)
+    draw_wrapped(message)
+    ImGui.PopStyleColor(ctx)
+    ImGui.Spacing(ctx)
+    ImGui.Separator(ctx)
+    ImGui.Spacing(ctx)
+    if ImGui.Button(ctx, "OK", 80, 0) then window_open = false end
 end
 
-function flatten_all_folders()
-    local num_tracks = CountTracks(0)
-
-    for i = 0, num_tracks - 1 do
-        local track = GetTrack(0, i)
-        SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", 0)
-    end
-end
-
-function make_all_tracks_one_folder()
-    local num_tracks = CountTracks(0)
-    if num_tracks < 2 then
-        Undo_EndBlock("Make all tracks one folder", -1)
-        return
-    end
-
-    local first_track = GetTrack(0, 0)
-    SetMediaTrackInfo_Value(first_track, "I_FOLDERDEPTH", 1)
-
-    for i = 1, num_tracks - 2 do
-        local track = GetTrack(0, i)
-        SetMediaTrackInfo_Value(track, "I_FOLDERDEPTH", 0)
-    end
-
-    local last_track = GetTrack(0, num_tracks - 1)
-    SetMediaTrackInfo_Value(last_track, "I_FOLDERDEPTH", -1)
-end
-
-function delete_empty_tracks()
-    local num_tracks = CountTracks(0)
-
-    for i = num_tracks - 1, 0, -1 do
-        local track = GetTrack(0, i)
-        local item_count = CountTrackMediaItems(track)
-        if item_count == 0 then
-            DeleteTrack(track)
+local function main()
+    if frame_count == 0 then
+        local viewport = ImGui.GetMainViewport(ctx)
+        if ImGui.ValidatePtr(viewport, 'ImGui_Viewport*') then
+            local center_x, center_y = ImGui.Viewport_GetCenter(viewport)
+            ImGui.SetNextWindowPos(ctx, center_x, center_y, ImGui.Cond_Appearing, 0.5, 0.5)
         end
     end
+    frame_count = frame_count + 1
 
-    local remaining_tracks = CountTracks(0)
-    if remaining_tracks == 1 then
-        InsertTrackAtIndex(1, true)
+    ImGui.SetNextWindowSizeConstraints(ctx, WINDOW_WIDTH, 0, WINDOW_WIDTH, math.huge)
+    local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_AlwaysAutoResize
+    local opened, open_ref = ImGui.Begin(ctx, WINDOW_TITLE, true, window_flags)
+    window_open = open_ref
+
+    if opened then
+        if state == "choose" then
+            draw_choose()
+        elseif state == "working" then
+            ImGui.Text(ctx, message)
+        else
+            draw_message()
+        end
+        if gui_mode.imgui_close_shortcut(ImGui, ctx) then window_open = false end
+        ImGui.End(ctx)
+    end
+
+    if state == "working" and pending and frame_count > pending.frame then
+        local job = pending
+        pending = nil
+        start_conversion(job.sequential, job.marker_track_index)
+    end
+
+    if window_open then
+        defer(main)
+    elseif converted then
+        Main_OnCommand(NamedCommandLookup(MISSION_CONTROL_CMD), 0)
     end
 end
 
-function reset_all_routing()
-    local num_tracks = CountTracks(0)
-
-    for i = 0, num_tracks - 1 do
-        local track = GetTrack(0, i)
-
-        local send_count = GetTrackNumSends(track, 0)
-        for s = send_count - 1, 0, -1 do
-            RemoveTrackSend(track, 0, s)
-        end
-
-        local receive_count = GetTrackNumSends(track, -1)
-        for r = receive_count - 1, 0, -1 do
-            RemoveTrackSend(track, -1, r)
-        end
-
-        local hwout_count = GetTrackNumSends(track, 1)
-        for h = hwout_count - 1, 0, -1 do
-            RemoveTrackSend(track, 1, h)
-        end
-
-        SetMediaTrackInfo_Value(track, "B_MAINSEND", 1)
-    end
-end
-
-function add_rc_ext_state()
-    SetProjExtState(0, "ReaClassical", "RCProject", "y")
-    local creation_date = os.date("%Y-%m-%d %H:%M:%S", os.time())
-    SetProjExtState(0, "ReaClassical", "CreationDate", creation_date)
-end
-
-function tag_source_tracks()
-    local num_tracks = CountTracks(0)
-    for i = 0, num_tracks - 1 do
-        local track = GetTrack(0, i)
-        GetSetMediaTrackInfo_String(track, "P_EXT:Source", "y", true)
-    end
-end
-
-main()
+defer(main)
