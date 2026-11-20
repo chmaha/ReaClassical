@@ -1,8 +1,9 @@
 @description ReaEdit
 @author chmaha
-@version 1.1
+@version 1.2
 @changelog
-  Make xfade follow RC26 conventions
+  Rename Insert with timestretching to Replace with timestretching (rebind any key you had assigned to it)
+  Make S-D edits, insert edits and deletes undoable in one step
 @metapackage
 @provides
   [main] ReaEdit_*.lua
