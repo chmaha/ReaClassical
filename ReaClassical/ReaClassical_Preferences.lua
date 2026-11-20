@@ -47,7 +47,7 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua'
 local ImGui = require 'imgui' '0.10'
 
 local year = os.date("%Y")
-local default_values = '35,200,3,7,0,0,0,0,0.75,' .. year .. ',WAV,0,0,0,0,0,0,0'
+local default_values = '35,200,3,7,0,0,0,0,0.75,' .. year .. ',WAV,0,0,0,0,0,0,0,3'
 local NUM_OF_ENTRIES = select(2, default_values:gsub(",", ",")) + 1
 local labels = {
     'S-D Crossfade Length (ms)',
@@ -67,7 +67,8 @@ local labels = {
     'Source Audition Mode',
     'Marker Offset During Rec/Play (s)',
     'Play Edit After Making It',
-    'Global Take Numbers'
+    'Global Take Numbers',
+    'Edit Playback Pre-roll (s)'
 }
 
 local binary_options = { 5, 6, 7, 8, 12, 13, 14, 15, 17, 18 }
@@ -366,9 +367,9 @@ function pref_check()
                 pass = false
                 invalid_msg = "INDEX0 length must be greater than or equal to 1.\n"
                 break
-            elseif i ~= 9 and i ~= 16 and num ~= math.floor(num) then
+            elseif i ~= 9 and i ~= 16 and i ~= 19 and num ~= math.floor(num) then
                 pass = false
-                invalid_msg = "Numeric entries (except Alt Audition Rate and Marker Offset) must be integers.\n"
+                invalid_msg = "Numeric entries (except Alt Audition Rate, Marker Offset and Pre-roll) must be integers.\n"
                 break
             end
         end

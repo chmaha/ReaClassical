@@ -44,12 +44,12 @@ local PREF_LABELS = {
     "Year of Production", "CUE Audio Format", "Floating Destination Folder",
     "Find Takes Using Item Names", "Show Only Item Take Numbers", "Source Audition Mode",
     "Marker Offset During Record or Play in Seconds", "Play Edit After Making It",
-    "Global Take Numbers",
+    "Global Take Numbers", "Edit Playback Pre-roll in Seconds",
 }
 local PREF_BINARY = { [5] = true, [6] = true, [7] = true, [8] = true,
     [12] = true, [13] = true, [14] = true, [15] = true, [17] = true, [18] = true }
 local PREF_FORMATS = { "WAV", "FLAC", "MP3", "AIFF" }
-local PREF_DEFAULTS = "35,200,3,7,0,0,0,0,0.75," .. os.date("%Y") .. ",WAV,0,0,0,0,2,0,0"
+local PREF_DEFAULTS = "35,200,3,7,0,0,0,0,0.75," .. os.date("%Y") .. ",WAV,0,0,0,0,2,0,0,3"
 
 local PREF_DEFAULT_VALUES = {}
 
@@ -108,7 +108,7 @@ local function apply_pref_value(i, str)
     if not num then return "Please enter a number" end
     if num < 0 then return "Must not be negative" end
     if i == 3 and num < 1 then return "Must be at least 1" end
-    if i ~= 9 and i ~= 16 and num ~= math.floor(num) then return "Must be a whole number" end
+    if i ~= 9 and i ~= 16 and i ~= 19 and num ~= math.floor(num) then return "Must be a whole number" end
     prefs[i] = num
     save_prefs()
     return nil

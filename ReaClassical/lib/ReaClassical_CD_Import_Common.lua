@@ -162,9 +162,9 @@ function M.run(opts)
         Main_OnCommand(40691, 0)
     end
 
-    local PREF_N = 18
+    local PREF_N = 19
     local pref_year = os.date("%Y")
-    local pref_default = "35,200,3,7,0,0,0,0,0.75," .. pref_year .. ",WAV,0,0,0,0,2,0,0"
+    local pref_default = "35,200,3,7,0,0,0,0,0.75," .. pref_year .. ",WAV,0,0,0,0,2,0,0,3"
     local default_entries = {}
     for v in pref_default:gmatch("([^,]+)") do default_entries[#default_entries + 1] = v end
     local _, saved_prefs = GetProjExtState(0, "ReaClassical", "Preferences")
