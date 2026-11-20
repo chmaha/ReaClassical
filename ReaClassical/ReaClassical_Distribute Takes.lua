@@ -37,6 +37,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local region_export = require("ReaClassical_Region_Export")
+local global_take = require("ReaClassical_Global_Take")
 
 local rs = region_export.load_render_settings()
 
@@ -149,6 +150,7 @@ function build_take_filter(mode, list_text)
 end
 
 function collect_regions_for_track(folder_track, filter, keep_rank)
+    local use_global = global_take.enabled()
     local regions = {}
     for i = 0, GetTrackNumMediaItems(folder_track) - 1 do
         local item = GetTrackMediaItem(folder_track, i)
@@ -158,6 +160,10 @@ function collect_regions_for_track(folder_track, filter, keep_rank)
             local len = GetMediaItemInfo_Value(item, "D_LENGTH")
             local _, raw_name = GetSetMediaItemTakeInfo_String(take, "P_NAME", "", false)
             local name = region_export.clean_take_name(raw_name, keep_rank)
+            local global_num = use_global and global_take.get(item)
+            if global_num and name ~= "" then
+                name = string.format("G%03d_%s", global_num, name)
+            end
             if name ~= "" then
                 regions[#regions + 1] = { start = pos, finish = pos + len, name = name }
             end
