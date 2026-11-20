@@ -27,17 +27,6 @@ package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. 
 local say = require("ReaClassical_Announce")
 
 local function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
-        return
-    end
 
     Main_OnCommand(40026, 0)
     say("Project saved")

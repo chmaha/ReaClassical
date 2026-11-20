@@ -25,17 +25,6 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local main
 
 function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
-        return
-    end
 
     SetProjExtState(0, "ReaClassical", "PreviousStopPosition", "")
 

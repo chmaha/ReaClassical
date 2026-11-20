@@ -30,17 +30,6 @@ local humanize_timestr = require("ReaClassical_Time_Naming")
 local main
 
 function main()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
-        return
-    end
 
     local _, pos_str = GetProjExtState(0, "ReaClassical", "PreviousStopPosition")
     if pos_str == "" then

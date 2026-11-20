@@ -41,17 +41,6 @@ function check_for_automation()
 end
 
 function main()
-local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-if workflow == "" then
-local modifier = "Ctrl"
-local system = GetOS()
-if string.find(system, "^OSX") or string.find(system, "^macOS") then
-modifier = "Cmd"
-end
-MB("Please create a ReaClassical project via " .. modifier
-.. "+N to use this function.", "ReaClassical Error", 0)
-return
-end
 PreventUIRefresh(1)
 local num_pre_selected = CountSelectedTracks(0)
 local pre_selected = {}

@@ -26,17 +26,6 @@ local main
 function main()
     PreventUIRefresh(1)
     Undo_BeginBlock()
-    local _, workflow = GetProjExtState(0, "ReaClassical", "Workflow")
-    if workflow == "" then
-        local modifier = "Ctrl"
-        local system = GetOS()
-        if string.find(system, "^OSX") or string.find(system, "^macOS") then
-            modifier = "Cmd"
-        end
-        MB("Please create a ReaClassical project via " .. modifier
-            .. "+N to use this function.", "ReaClassical Error", 0)
-        return
-    end
     local horizontal_zoom = NamedCommandLookup("_RSe4ae3f4797f2fb7f209512fc22ad6ef9854ca770")
     local vertical_zoom = NamedCommandLookup("_RS444f747139500db030a1c4e03b8a0805ac502dfe")
     Main_OnCommand(horizontal_zoom, 0)
