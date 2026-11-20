@@ -75,7 +75,7 @@ function main()
 
     local function abort_edit()
         restore_all_ripple()
-        Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
+        Undo_EndBlock('Assembly Line / 3-point Insert Edit', -1)
         PreventUIRefresh(-1)
     end
 
@@ -195,7 +195,7 @@ function main()
     restore_view(initial_curpos, initial_selected_items, initial_selected_tracks,
         initial_view_start, initial_view_end)
 
-    Undo_EndBlock('Assembly Line / 3-point Insert Edit', 0)
+    Undo_EndBlock('Assembly Line / 3-point Insert Edit', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()

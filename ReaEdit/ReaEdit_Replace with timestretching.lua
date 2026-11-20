@@ -73,7 +73,7 @@ function main()
 
     local function abort_edit()
         restore_all_ripple()
-        Undo_EndBlock('S-D edit with timestretching', 0)
+        Undo_EndBlock('S-D edit with timestretching', -1)
         PreventUIRefresh(-1)
     end
 
@@ -196,24 +196,24 @@ function main()
             warning = "Crossfade shortened to " .. table.concat(parts, " and ") .. " due to limited material."
         end
         if warning and not APIExists("osara_outputMessage") then
-            MB(warning, "Insert with timestretching", 0)
+            MB(warning, "Replace with timestretching", 0)
         end
         local completion = "Edit completed with timestretching"
         if warning then completion = completion .. ". " .. warning end
         say(completion)
     else
         MB("Please add 4 markers: DEST-IN, DEST-OUT, SOURCE-IN and SOURCE-OUT",
-            "Insert with timestretching", 0)
+            "Replace with timestretching", 0)
         restore_all_ripple()
     end
 
-    Undo_EndBlock('S-D edit with timestretching', 0)
+    Undo_EndBlock('S-D edit with timestretching', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
 
     if sliver_note ~= "" then
-        MB(sliver_note, "Insert with timestretching", 0)
+        MB(sliver_note, "Replace with timestretching", 0)
     end
 end
 

@@ -79,7 +79,7 @@ function main()
 
     local function abort_edit()
         restore_all_ripple()
-        Undo_EndBlock('S-D Edit', 0)
+        Undo_EndBlock('S-D Edit', -1)
         PreventUIRefresh(-1)
     end
 
@@ -238,7 +238,7 @@ function main()
         return
     end
 
-    Undo_EndBlock('S-D Edit', 0)
+    Undo_EndBlock('S-D Edit', -1)
     PreventUIRefresh(-1)
     UpdateArrange()
     UpdateTimeline()
