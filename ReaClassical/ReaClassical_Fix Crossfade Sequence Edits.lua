@@ -91,8 +91,11 @@ local function main()
     local window_flags = ImGui.WindowFlags_NoCollapse | ImGui.WindowFlags_AlwaysAutoResize
 
     if frame_count == 0 then
-        local viewport_center_x, viewport_center_y = ImGui.Viewport_GetCenter(ImGui.GetMainViewport(ctx))
-        ImGui.SetNextWindowPos(ctx, viewport_center_x, viewport_center_y, ImGui.Cond_Appearing, 0.5, 0.5)
+        local viewport = ImGui.GetMainViewport(ctx)
+        if ImGui.ValidatePtr(viewport, 'ImGui_Viewport*') then
+            local viewport_center_x, viewport_center_y = ImGui.Viewport_GetCenter(viewport)
+            ImGui.SetNextWindowPos(ctx, viewport_center_x, viewport_center_y, ImGui.Cond_Appearing, 0.5, 0.5)
+        end
     end
     frame_count = frame_count + 1
 
