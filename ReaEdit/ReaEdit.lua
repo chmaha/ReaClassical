@@ -1,9 +1,9 @@
 @description ReaEdit
 @author chmaha
-@version 1.2
+@version 1.3
 @changelog
-  Rename Insert with timestretching to Replace with timestretching (rebind any key you had assigned to it)
-  Make S-D edits, insert edits and deletes undoable in one step
+  ReaClassical 27.0.28
+  ReaEdit: Fix undo
 @metapackage
 @provides
   [main] ReaEdit_*.lua
