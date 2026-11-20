@@ -30,6 +30,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local global_take = require("ReaClassical_Global_Take")
+local blemish = require("ReaClassical_Blemish")
 local enum_project_markers = require("ReaClassical_Marker_Enum")
 
 local _, debug_str = GetProjExtState(0, "ReaClassical", "DebugAnnounce")
@@ -63,7 +64,7 @@ local get_folder_arm_status, find_mixer_for_track, is_mixer_disabled, check_pref
 local load_item_rank_and_notes, save_item_rank_and_notes, rgba_to_native, update_take_name
 local apply_rank_and_notes_to_items, store_last_recorded_guids, apply_rank_and_notes_by_guids
 local apply_rank_and_notes_to_item, find_first_folder_track, get_folder_items_at_midpoint
-local armed_tracks_have_input, add_rank_marker
+local armed_tracks_have_input, add_rank_marker, update_blemish_feedback
 
 local imgui_exists = APIExists("ImGui_GetVersion")
 if not imgui_exists then
@@ -85,8 +86,12 @@ end
 
 local auto_color_pref = 0
 local ranking_color_pref = 0
-local RANK_MARKER_CMD = 43158
-local RANK_MARKER_OFFSET = 2
+local BLEMISH_FLASH_SECONDS = 3
+local blemish_seen_stamp = blemish.last()
+local blemish_flash_until = 0
+local blemish_flash_text = ""
+local blemish_take_count = 0
+local blemish_was_recording = false
 
 function check_prefs()
   local _, input = GetProjExtState(0, "ReaClassical", "Preferences")
@@ -106,6 +111,7 @@ end
 check_prefs()
 
 set_action_options(2)
+SetExtState("ReaClassical", "RecordPanelOpen", "1", false)
 
 local iterated_filenames = false
 local added_take_number = false
@@ -626,13 +632,24 @@ function save_item_rank_and_notes(item, rank, note)
 end
 
 function add_rank_marker()
-  local play_state = GetPlayState()
-  local active = (play_state & 1) == 1 or (play_state & 4) == 4
-  local original_cursor = GetCursorPosition()
-  local pos = active and math.max(GetPlayPosition() - RANK_MARKER_OFFSET, 0) or original_cursor
-  SetEditCurPos(pos, false, false)
-  Main_OnCommand(RANK_MARKER_CMD, 0)
-  SetEditCurPos(original_cursor, false, false)
+  say(blemish.describe(blemish.mark()))
+end
+
+function update_blemish_feedback(is_recording)
+  if is_recording and not blemish_was_recording then blemish_take_count = 0 end
+  blemish_was_recording = is_recording
+  local stamp, pos = blemish.last()
+  if stamp and stamp ~= blemish_seen_stamp then
+    blemish_seen_stamp = stamp
+    blemish_flash_until = time_precise() + BLEMISH_FLASH_SECONDS
+    if is_recording then
+      blemish_take_count = blemish_take_count + 1
+      blemish_flash_text = blemish.describe(pos) .. " (" .. blemish_take_count .. " this take)"
+    else
+      blemish_flash_text = blemish.describe(pos)
+    end
+  end
+  return time_precise() < blemish_flash_until
 end
 
 function get_take_count(session_name)
@@ -664,6 +681,7 @@ function get_take_count(session_name)
 end
 
 function clean_up()
+  SetExtState("ReaClassical", "RecordPanelOpen", "", false)
   if editing_item and ValidatePtr2(0, editing_item, "MediaItem*") then
     save_item_rank_and_notes(editing_item, recording_rank, recording_note)
   end
@@ -1297,8 +1315,14 @@ function draw(playstate)
   if next_disabled then ImGui.EndDisabled(ctx) end
 
   local rank_y = button_y + button_height + (30 * scale)
+  local blemish_flash = update_blemish_feedback(is_recording)
 
-  if playstate == 0 then
+  if blemish_flash then
+    ImGui.SetCursorPos(ctx, buttons_start_x, rank_y - (18 * scale))
+    ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0xFFBF00FF)
+    ImGui.Text(ctx, blemish_flash_text)
+    ImGui.PopStyleColor(ctx)
+  elseif playstate == 0 then
     ImGui.SetCursorPos(ctx, buttons_start_x, rank_y - (18 * scale))
     if editing_item then
       ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x4B9CD3FF)
@@ -1342,10 +1366,12 @@ function draw(playstate)
   ImGui.PopStyleColor(ctx)
 
   ImGui.SameLine(ctx, 0, button_spacing)
+  if blemish_flash then ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xB37400FF) end
   if ImGui.Button(ctx, "Mark Blemish", total_button_width / 2 - button_spacing) then
     add_rank_marker()
   end
-  ImGui.SetItemTooltip(ctx, "Add a down-rank item marker " .. RANK_MARKER_OFFSET
+  if blemish_flash then ImGui.PopStyleColor(ctx) end
+  ImGui.SetItemTooltip(ctx, "Add a down-rank item marker " .. blemish.OFFSET
     .. " s before the playhead (F10)")
 
   local note_y = rank_y + (25 * scale)
