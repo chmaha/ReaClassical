@@ -118,12 +118,28 @@
 <ol>
 <li>A new project tab is created and <kbd>_converted</kbd> suffix added to the RPP file</li>
 <li>Any folders are flattened</li>
+<li>If more than one track has items, you choose how to treat them (see below)</li>
 <li>Any empty tracks are deleted</li>
 <li>A single folder is formed in preparation for a horizontal workflow</li>
 <li>Any effects are moved to the relevant mixer tracks</li>
 <li>Any custom routing is removed</li>
 </ol>
-<p>At this point, a horizontal workflow is set up and all that is left for the engineer to do is recreate any custom routing using Mission Control. For example, if the original REAPER project used folders to organize orchestral section microphone channels, this would be recreated by clicking on the appropriate routing buttons to disconnect from RCMaster and instead route to one or more newly-created submix tracks.</p>
+<p>The conversion window explains these steps before anything changes. Click <strong>Convert</strong> (or, with several tracks, the option that describes them) to go ahead; when it finishes, the window closes and Mission Control opens. At this point, a horizontal workflow is set up and all that is left for the engineer to do is recreate any custom routing using Mission Control. For example, if the original REAPER project used folders to organize orchestral section microphone channels, this would be recreated by clicking on the appropriate routing buttons to disconnect from RCMaster and instead route to one or more newly-created submix tracks.</p>
+<h4 id="microphones-or-separate-material">Microphones or Separate Material</h4>
+<p>When more than one track has items, a window asks what the tracks contain:</p>
+<ul>
+<li><strong>Microphones of one recording:</strong> the usual case for a classical session. The tracks become one folder with one track per microphone. Existing markers and regions stay where they are.</li>
+<li>
+<p><strong>Separate material:</strong> each track holds different material, such as separate pieces, takes or alternative versions, all starting near the beginning of the timeline. The tracks are placed one after another, left to right, in a single-track folder, the same as a single-track ReaClassical project, separated by the Smart Import take gap (2 seconds by default). Each track's items keep their timing relative to one another, and a marker named after the original track marks where its material starts. Track FX and automation are kept from the first track only. The combined track is named after the project file (for example <code>apoclypse flower</code> for <code>apoclypse flower.rpp</code>); you can rename it in Mission Control.</p>
+<p>If the project already has markers or regions (rehearsal letters, for example), choose which track they belong to from <strong>Existing markers and regions belong to</strong>. They move with that track's material. ReaClassical preselects the track whose material spans all of them; choose <strong>Leave in place</strong> to keep them at their original positions.</p>
+</li>
+</ul>
+<p>Click <strong>Cancel</strong> or close the window to leave the project unconverted.</p>
+<div class="admonition accessibility">
+<p class="admonition-title">Screen reader users (Clara)</p>
+<p>The choice is announced as a list: <kbd>↑</kbd> and <kbd>↓</kbd> move between <strong>Microphones of one recording</strong> and <strong>Separate material</strong> (each is read with a short description), <kbd>Enter</kbd> converts and <kbd>Escape</kbd> cancels. The steps above are read out first, and "Project converted" is announced when it finishes. With a single track, there is no list: press <kbd>Enter</kbd> to convert. If you choose <strong>Separate material</strong> and the project has markers or regions, a second list asks which track they belong to: <kbd>↑</kbd> and <kbd>↓</kbd> choose a track or Leave in place, <kbd>Enter</kbd> converts and <kbd>Escape</kbd> goes back.</p>
+</div>
+<p>A project whose material is on a single track (either from the start or after choosing <strong>Separate material</strong>) becomes a single-track folder too.</p>
 
 				<div class="clear"></div>
 
