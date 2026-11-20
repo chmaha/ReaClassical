@@ -30,19 +30,19 @@ local DEFAULT_PRE_ROLL = 3.0
 local PREF_INDEX = 17
 local PRE_ROLL_INDEX = 19
 
-local function pref_entries()
-    local _, saved = GetProjExtState(0, "ReaClassical", "Preferences")
+local function pref_entries(proj)
+    local _, saved = GetProjExtState(proj or 0, "ReaClassical", "Preferences")
     local entries = {}
     for entry in saved:gmatch("([^,]+)") do entries[#entries + 1] = entry end
     return entries
 end
 
-function M.enabled()
-    return tonumber(pref_entries()[PREF_INDEX]) == 1
+function M.enabled(proj)
+    return tonumber(pref_entries(proj)[PREF_INDEX]) == 1
 end
 
-function M.pre_roll()
-    local value = tonumber(pref_entries()[PRE_ROLL_INDEX])
+function M.pre_roll(proj)
+    local value = tonumber(pref_entries(proj)[PRE_ROLL_INDEX])
     if not value or value < 0 then return DEFAULT_PRE_ROLL end
     return value
 end
@@ -85,6 +85,14 @@ local function has_material_before(tracks, from_pos, to_pos)
         end
     end
     return false
+end
+
+function M.focus_destination(dest_proj, source_proj)
+    if not dest_proj then return end
+    if source_proj and source_proj ~= dest_proj and (GetPlayStateEx(source_proj) & 1) == 1 then
+        OnStopButtonEx(source_proj)
+    end
+    SelectProjectInstance(dest_proj)
 end
 
 function M.play_from(edit_pos)

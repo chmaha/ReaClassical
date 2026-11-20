@@ -270,8 +270,8 @@ function main()
     if warning then completion = completion .. ". " .. warning end
     say(completion)
 
-    if playback_pos and edit_playback.enabled() then
-        if dest_proj then move_to_project_tab(dest_proj) end
+    if playback_pos and edit_playback.enabled(dest_proj) then
+        edit_playback.focus_destination(dest_proj, source_proj)
         select_matching_dest_folder()
         active_folder.set_active(GetSelectedTrack(0, 0))
         edit_playback.play_from(playback_pos)

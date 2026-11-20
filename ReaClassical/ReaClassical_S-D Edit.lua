@@ -292,7 +292,8 @@ function main()
         MB(sliver_note, "Source-Destination Edit", 0)
     end
 
-    if playback_pos and edit_playback.enabled() then
+    if playback_pos and edit_playback.enabled(dest_proj) then
+        edit_playback.focus_destination(dest_proj, source_proj)
         edit_playback.play_from(playback_pos)
     end
 end
