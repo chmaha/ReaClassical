@@ -68,12 +68,22 @@ function M.get_adjacent_neighbors(items, edge)
     for idx, item in ipairs(items) do
         local track = GetMediaItemTrack(item)
         local n = CountTrackMediaItems(track)
+        local pos = GetMediaItemInfo_Value(item, "D_POSITION")
+        local item_end = pos + GetMediaItemInfo_Value(item, "D_LENGTH")
         for j = 0, n - 1 do
             if GetTrackMediaItem(track, j) == item then
                 if edge == "right" then
-                    neighbors[idx] = (j < n - 1) and GetTrackMediaItem(track, j + 1) or nil
+                    local nb = (j < n - 1) and GetTrackMediaItem(track, j + 1) or nil
+                    if nb and GetMediaItemInfo_Value(nb, "D_POSITION") <= item_end + MIN_GAP then
+                        neighbors[idx] = nb
+                    end
                 else
-                    neighbors[idx] = (j > 0) and GetTrackMediaItem(track, j - 1) or nil
+                    local nb = (j > 0) and GetTrackMediaItem(track, j - 1) or nil
+                    if nb then
+                        local nb_end = GetMediaItemInfo_Value(nb, "D_POSITION")
+                            + GetMediaItemInfo_Value(nb, "D_LENGTH")
+                        if nb_end >= pos - MIN_GAP then neighbors[idx] = nb end
+                    end
                 end
                 break
             end
