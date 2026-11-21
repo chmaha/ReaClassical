@@ -1,17 +1,8 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.28
+@version 27.0.29
 @changelog
-  Quick export: prefix filename with Gxxx global take number when enabled
-  Find take: accept G-prefexed input
-  Add destination only and show all folders actions; share folder vis logic with MC
-  Add note at cursor: add an empty note item on NOTES track and open its notes
-  Mark Blemish: use 2s down-rank action
-  Play Edit after making it: dual-tab improvements
-  Play edit after making it: Add pre-roll pref and skip pre-roll before first edit
-  Allow project and transport functions in regular REAPER projects
-  Convert REAPER proj:choose microphones or separate material
-  Guard ImGui window centering against an invalid viewport
+  Don't crossfade with non-adjacent items (keeps fades, fixes edit pre-roll after gaps)
 @metapackage
 @provides
   [main] ReaClassical_*.lua
