@@ -1,8 +1,9 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.29
+@version 27.0.30
 @changelog
-  Don't crossfade with non-adjacent items (keeps fades, fixes edit pre-roll after gaps)
+  End split at cursor
+  Add section about factory reset and customizations
 @metapackage
 @provides
   [main] ReaClassical_*.lua
