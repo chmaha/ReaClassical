@@ -54,7 +54,8 @@ function M.open()
     for i = 0, CountTracks(0) - 1 do
         local t = GetTrack(0, i)
         local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
-        if lb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1 then
+        local _, tb = GetSetMediaTrackInfo_String(t, "P_EXT:talkback", "", false)
+        if lb ~= "y" and tb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1 then
             any_armed = true; break
         end
     end
@@ -67,7 +68,8 @@ function M.open()
     for i = 0, CountTracks(0) - 1 do
         local t = GetTrack(0, i)
         local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
-        if lb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1
+        local _, tb = GetSetMediaTrackInfo_String(t, "P_EXT:talkback", "", false)
+        if lb ~= "y" and tb ~= "y" and GetMediaTrackInfo_Value(t, "I_RECARM") == 1
             and GetMediaTrackInfo_Value(t, "I_FOLDERDEPTH") == 1 then
             local _, take_num = GetProjExtState(0, "ReaClassical", "CurrentTakeNumber")
             armed_take = take_num

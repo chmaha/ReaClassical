@@ -31,6 +31,7 @@ local pan_from_name = require("ReaClassical_Pan_From_Name")
 local mixer_core = require("ReaClassical_Mixer_Core")
 local spare_track = require("ReaClassical_Spare_Track")
 local notes_track = require("ReaClassical_Notes_Track")
+local talkback_track = require("ReaClassical_Talkback_Track")
 
 local M = {}
 
@@ -634,6 +635,33 @@ function M.try_add_remove(cmd)
         return true
     end
 
+    local tb_input = cmd:match("^addtb=(%d+)$")
+    if tb_input then
+        local existing = talkback_track.find()
+        if existing then
+            talkback_track.set_input(existing, tonumber(tb_input) - 1)
+            say("Talkback input set to " .. tb_input)
+            return true
+        end
+        Undo_BeginBlock()
+        talkback_track.create(tonumber(tb_input) - 1, nil)
+        Undo_EndBlock("Add Talkback Track", -1)
+        say("Talkback track added, input " .. tb_input
+            .. ". Muted. Set its output with tb=out,N")
+        return true
+    end
+
+    if cmd == "rmtb" then
+        local existing = talkback_track.find()
+        if not existing then
+            say("No talkback track found")
+            return true
+        end
+        DeleteTrack(existing)
+        say("Talkback track removed")
+        return true
+    end
+
     if cmd == "rmlb" then
         local lb_list = mixer_core.get_special_tracks_by_type("listenback")
         if #lb_list == 0 then
@@ -823,7 +851,7 @@ end
 
 local function is_target(str)
     return str == "rcm" or str:match("^%d+$") ~= nil or str:match("^[%#@]%d*$") ~= nil
-        or str:match("^ref%d*$") ~= nil or str == "rt" or str == "live" or str == "lb" or str == "pb"
+        or str:match("^ref%d*$") ~= nil or str == "rt" or str == "live" or str == "lb" or str == "tb" or str == "pb"
 end
 function M.try_routing_fx(cmd)
     local word_target, word_rest = mixer_core.split_word_target(cmd)
@@ -917,7 +945,12 @@ function M.try_routing_fx(cmd)
         local is_mixer = out_target:match("^%d+$") ~= nil
         local mono = is_mixer and not mixer_core.mixer_track_is_stereo(track)
         local width = mono and 1 or mixer_core.track_channel_width(track)
-        mixer_core.set_hw_output(track, ch - 1, mono)
+        if talkback_track.is_talkback_track(track) then
+            width = 1
+            talkback_track.set_output(track, ch - 1)
+        else
+            mixer_core.set_hw_output(track, ch - 1, mono)
+        end
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         local label = (width > 1) and string.format("%d and %d", ch, ch + width - 1) or tostring(ch)
         say("Hardware output set to " .. label .. ": " .. humanize_track_name(name))
@@ -980,7 +1013,7 @@ function M.try_routing_fx(cmd)
         for _, track in ipairs(mixer_core.get_mixer_tracks()) do
             mixer_core.set_hw_output(track, nil, false)
         end
-        for _, kind in ipairs({ "aux", "submix", "roomtone", "reference", "rcmaster", "live", "listenback", "playback" }) do
+        for _, kind in ipairs({ "aux", "submix", "roomtone", "reference", "rcmaster", "live", "listenback", "talkback", "playback" }) do
             for _, info in ipairs(mixer_core.get_special_tracks_by_type(kind)) do
                 mixer_core.set_hw_output(info.track, nil, false)
             end

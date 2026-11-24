@@ -90,13 +90,14 @@ function M.get_special_tracks()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
-            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" or talkback_state == "y"
             or playback_state == "y" or notes_state == "y" then
             local track_type = "other"
             if aux_state == "y" then
@@ -111,6 +112,8 @@ function M.get_special_tracks()
                 track_type = "live"
             elseif listenback_state == "y" then
                 track_type = "listenback"
+            elseif talkback_state == "y" then
+                track_type = "talkback"
             elseif rcmaster_state == "y" then
                 track_type = "rcmaster"
             elseif playback_state == "y" then
@@ -138,7 +141,7 @@ function M.get_special_tracks()
 
     local type_priority = {
         aux = 1, submix = 1, roomtone = 3, rcmaster = 4,
-        live = 5, reference = 6, listenback = 7, playback = 8
+        live = 5, reference = 6, listenback = 7, talkback = 8, playback = 9
     }
     table.sort(tracks, function(a, b)
         local pa = type_priority[a.type] or 99

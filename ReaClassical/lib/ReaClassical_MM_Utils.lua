@@ -29,17 +29,17 @@ local track_rename = require("ReaClassical_Track_Rename")
 local M = {}
 
 local SPECIAL_PEXTS = {
-    "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "rcmaster", "playback",
+    "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "talkback", "rcmaster", "playback",
 }
 
 local FIXED_TYPES = {
-    rcmaster = true, roomtone = true, live = true, listenback = true, playback = true,
+    rcmaster = true, roomtone = true, live = true, listenback = true, talkback = true, playback = true,
 }
 
 local TYPE_LABELS = {
     mixer = "Mixer", rcmaster = "RCMASTER", aux = "Aux", submix = "Submix",
     reference = "Reference", roomtone = "RoomTone", live = "Live",
-    listenback = "Listenback", playback = "Playback",
+    listenback = "Listenback", talkback = "Talkback", playback = "Playback",
 }
 
 function M.is_special_track(t)
@@ -125,6 +125,7 @@ local function classify(track)
         { "rcref",      "reference" },
         { "live",       "live" },
         { "listenback", "listenback" },
+        { "talkback",   "talkback" },
         { "rcmaster",   "rcmaster" },
         { "playback",   "playback" },
     }

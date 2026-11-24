@@ -160,6 +160,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 local special_track_order = dofile(script_path .. "lib/ReaClassical_Special_Track_Order.lua")
 local spare_track = dofile(script_path .. "lib/ReaClassical_Spare_Track.lua")
 local notes_track = dofile(script_path .. "lib/ReaClassical_Notes_Track.lua")
+local talkback_track = dofile(script_path .. "lib/ReaClassical_Talkback_Track.lua")
 
 local function row_select_area(ctx, label, end_x, is_selected)
     local sx, sy = ImGui.GetCursorScreenPos(ctx)
@@ -183,6 +184,7 @@ local LISTENBACK_TRACK_NAME = "LISTENBACK"
 local listenback_input_channel = 0
 local listenback_is_stereo = false
 local playback_hw_channel = 0
+local talkback_input_channel = 0
 
 function main()
     if not ImGui.ValidatePtr(ctx, 'ImGui_Context*') then
@@ -576,6 +578,7 @@ function main()
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
                     aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" or
+                    aux_info.type == "talkback" or
                     aux_info.type == "playback" then
                     local num_channels = get_track_num_channels(aux_info.track)
 
@@ -641,10 +644,11 @@ function main()
                     if aux_info.type == "aux" or aux_info.type == "submix" or
                         aux_info.type == "roomtone" or aux_info.type == "reference" or
                         aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" or
+                        aux_info.type == "talkback" or
                         aux_info.type == "playback" then
                         local fresh_hw = get_hardware_outputs(aux_info.track)
                         local num_channels = get_track_num_channels(aux_info.track)
-                        if aux_info.type == "listenback" then
+                        if aux_info.type == "listenback" or aux_info.type == "talkback" then
                             num_channels = 1
                         end
 
@@ -888,6 +892,7 @@ function main()
                 if aux_info.type == "aux" or aux_info.type == "submix" or
                     aux_info.type == "roomtone" or aux_info.type == "reference" or
                     aux_info.type == "rcmaster" or aux_info.type == "live" or aux_info.type == "listenback" or
+                    aux_info.type == "talkback" or
                     aux_info.type == "playback" then
                     ImGui.PushID(ctx, "hw_special_" .. idx)
 
@@ -915,6 +920,9 @@ function main()
                     elseif aux_info.type == "listenback" then
                         display_prefix = "LB"
                         prefix_color = color_to_native(170, 200, 255)
+                    elseif aux_info.type == "talkback" then
+                        display_prefix = "TB"
+                        prefix_color = color_to_native(235, 150, 80)
                     elseif aux_info.type == "playback" then
                         display_prefix = "PB"
                         prefix_color = color_to_native(80, 200, 180)
@@ -974,7 +982,9 @@ function main()
                                 end
                             end
                         else
-                            if num_channels == 2 then
+                            if num_channels == 1 then
+                                label = tostring(ch + 1)
+                            elseif num_channels == 2 then
                                 label = string.format("%d+%d", ch + 1, ch + 2)
                             else
                                 label = string.format("%d-%d", ch + 1, ch + num_channels)
@@ -1056,7 +1066,9 @@ function main()
                             RemoveTrackSend(aux_info.track, 1, j)
                         end
 
-                        if changes.hw_channel >= 0 then
+                        if aux_info.type == "talkback" then
+                            talkback_track.set_output(aux_info.track, changes.hw_channel)
+                        elseif changes.hw_channel >= 0 then
                             local send_idx = CreateTrackSend(aux_info.track, nil)
 
                             SetTrackSendInfo_Value(aux_info.track, 1, send_idx, "I_DSTCHAN",
@@ -1322,6 +1334,9 @@ function main()
                     elseif aux_info.type == "listenback" then
                         display_prefix = "LB"
                         prefix_color = color_to_native(170, 200, 255)
+                    elseif aux_info.type == "talkback" then
+                        display_prefix = "TB"
+                        prefix_color = color_to_native(235, 150, 80)
                     elseif aux_info.type == "playback" then
                         display_prefix = "PB"
                         prefix_color = color_to_native(80, 200, 180)
@@ -1463,6 +1478,37 @@ function main()
                                 rec_input = (lb_new_input - 1)
                             end
                             SetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT", rec_input)
+                        end
+                    elseif aux_info.type == "talkback" then
+                        ImGui.SetNextItemWidth(ctx, 180)
+                        local tb_opts = {}
+                        if talkback_input_channel == 0 then
+                            table.insert(tb_opts, "Select mic input")
+                        else
+                            table.insert(tb_opts, "None")
+                        end
+                        for ch_idx = 1, MAX_INPUTS do
+                            local opt_text = tostring(ch_idx)
+                            if show_hardware_names then
+                                local hw_name = GetInputChannelName(ch_idx - 1)
+                                if hw_name and hw_name ~= "" then
+                                    opt_text = hw_name
+                                end
+                            end
+                            table.insert(tb_opts, opt_text)
+                        end
+                        local tb_opts_str = table.concat(tb_opts, "\0") .. "\0"
+                        local tb_changed, tb_new_input = ImGui.Combo(ctx, "##tb_input" .. idx, talkback_input_channel,
+                            tb_opts_str)
+                        if tb_changed then
+                            talkback_input_channel = tb_new_input
+                            talkback_track.set_input(aux_info.track, tb_new_input == 0 and -1 or (tb_new_input - 1))
+                        end
+                        if ImGui.IsItemHovered(ctx) then
+                            local out = talkback_track.get_output(aux_info.track)
+                            ImGui.SetTooltip(ctx, "Talkback mic input (never recorded, not in the mix)\n"
+                                .. "Output: " .. (out and tostring(out + 1) or "none - set in Hardware Routing")
+                                .. "\nUnmute (M) or run Toggle Talkback to talk")
                         end
                     elseif aux_info.type == "playback" then
                         ImGui.SetNextItemWidth(ctx, 180)
@@ -1673,7 +1719,7 @@ function main()
                     end
 
                     ImGui.SameLine(ctx)
-                    if aux_info.type == "listenback" or aux_info.type == "playback" then
+                    if aux_info.type == "listenback" or aux_info.type == "talkback" or aux_info.type == "playback" then
                         ImGui.BeginDisabled(ctx)
                     end
                     local changed_tcp, new_tcp = ImGui.Checkbox(ctx, "TCP##tcp" .. idx, aux_submix_tcp_visible[idx])
@@ -1685,12 +1731,14 @@ function main()
                         SetProjExtState(0, "ReaClassical_MissionControl", "tcp_visible_" .. aux_guid,
                             new_tcp and "1" or "0")
                     end
-                    if aux_info.type == "listenback" or aux_info.type == "playback" then
+                    if aux_info.type == "listenback" or aux_info.type == "talkback" or aux_info.type == "playback" then
                         ImGui.EndDisabled(ctx)
                     end
                     if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
                         if aux_info.type == "listenback" then
                             ImGui.SetTooltip(ctx, "Listenback is MCP only")
+                        elseif aux_info.type == "talkback" then
+                            ImGui.SetTooltip(ctx, "Talkback is MCP only")
                         elseif aux_info.type == "playback" then
                             ImGui.SetTooltip(ctx, "Playback is MCP only")
                         else
@@ -1897,6 +1945,7 @@ function main()
             local has_roomtone = false
             local has_live = false
             local has_listenback = false
+            local has_talkback = false
             local has_playback = false
             local has_notes = false
             for _, track_info in ipairs(aux_submix_tracks) do
@@ -1904,6 +1953,7 @@ function main()
                 if track_info.type == "roomtone" then has_roomtone = true end
                 if track_info.type == "live" then has_live = true end
                 if track_info.type == "listenback" then has_listenback = true end
+                if track_info.type == "talkback" then has_talkback = true end
                 if track_info.type == "playback" then has_playback = true end
             end
 
@@ -1915,6 +1965,7 @@ function main()
                     reference = 0,
                     live = 0,
                     listenback = 0,
+                    talkback = 0,
                     playback_hw = 0,
                     notes = 0
                 }
@@ -2003,6 +2054,28 @@ function main()
                 end
             end
 
+            if has_talkback then
+                ImGui.BeginDisabled(ctx)
+                ImGui.Text(ctx, "Talkback:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.TextDisabled(ctx, "(already exists)")
+                ImGui.EndDisabled(ctx)
+            else
+                ImGui.Text(ctx, "Talkback:")
+                ImGui.SameLine(ctx)
+                ImGui.SetCursorPosX(ctx, 150)
+                ImGui.SetNextItemWidth(ctx, 100)
+                local changed, new_val = ImGui.InputInt(ctx, "##talkback", add_special_counts.talkback)
+                if changed then
+                    add_special_counts.talkback = math.max(0, math.min(1, new_val))
+                end
+                if ImGui.IsItemHovered(ctx) then
+                    ImGui.SetTooltip(ctx, "Producer mic to a studio speaker: never recorded, not in the mix,\n"
+                        .. "stays live during recording and ignores solo")
+                end
+            end
+
             if has_playback then
                 ImGui.BeginDisabled(ctx)
                 ImGui.Text(ctx, "Playback:")
@@ -2085,6 +2158,12 @@ function main()
 
                     PreventUIRefresh(-1)
                     Undo_EndBlock("Add Listenback Track", -1)
+                end
+
+                if not has_talkback and add_special_counts.talkback > 0 then
+                    Undo_BeginBlock()
+                    talkback_track.create(-1, nil)
+                    Undo_EndBlock("Add Talkback Track", -1)
                 end
 
                 if not has_live and add_special_counts.live > 0 then
@@ -2360,13 +2439,14 @@ function get_special_tracks()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
-            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" or talkback_state == "y"
             or playback_state == "y" or notes_state == "y" then
             local track_type = "other"
             local has_routing = false
@@ -2385,6 +2465,8 @@ function get_special_tracks()
                 track_type = "live"
             elseif listenback_state == "y" then
                 track_type = "listenback"
+            elseif talkback_state == "y" then
+                track_type = "talkback"
             elseif rcmaster_state == "y" then
                 track_type = "rcmaster"
             elseif playback_state == "y" then
@@ -2406,7 +2488,7 @@ function get_special_tracks()
                 display_name = ""
             elseif track_type == "live" then
                 display_name = ""
-            elseif track_type == "listenback" then
+            elseif track_type == "listenback" or track_type == "talkback" then
                 display_name = ""
             elseif track_type == "rcmaster" then
                 display_name = ""
@@ -2436,8 +2518,9 @@ function get_special_tracks()
         live = 5,
         reference = 6,
         listenback = 7,
-        playback = 8,
-        notes = 9
+        talkback = 8,
+        playback = 9,
+        notes = 10
     }
 
     table.sort(tracks, function(a, b)
@@ -2927,6 +3010,17 @@ function init()
                 listenback_input_channel = (rec_input - 1024) + 1
             else
                 listenback_input_channel = rec_input + 1
+            end
+            break
+        end
+    end
+
+    talkback_input_channel = 0
+    for i, aux_info in ipairs(aux_submix_tracks) do
+        if aux_info.type == "talkback" then
+            local rec_input = GetMediaTrackInfo_Value(aux_info.track, "I_RECINPUT")
+            if rec_input >= 0 and rec_input < 512 then
+                talkback_input_channel = rec_input + 1
             end
             break
         end

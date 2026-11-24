@@ -112,11 +112,12 @@ end
 
 function arm_folder(parent_idx)
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
-    -- Re-arm listenback tracks
+    -- Re-arm listenback and talkback tracks
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
-        if lb_state == "y" then
+        local _, tb_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
+        if lb_state == "y" or tb_state == "y" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
         end
     end
@@ -205,11 +206,12 @@ end
 
 function solo()
     Main_OnCommand(40491, 0) -- un-arm all tracks for recording
-    -- Re-arm listenback tracks
+    -- Re-arm listenback and talkback tracks
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
         local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
-        if lb_state == "y" then
+        local _, tb_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
+        if lb_state == "y" or tb_state == "y" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
         end
     end
@@ -224,10 +226,11 @@ function solo()
         local _, rt_state = GetSetMediaTrackInfo_String(track, "P_EXT:roomtone", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
 
         if mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
-            or ref_state == "y" or listenback_state == "y" then
+            or ref_state == "y" or listenback_state == "y" or talkback_state == "y" then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 SetTrackSendInfo_Value(track, 0, j, "B_MUTE", 0)
@@ -235,7 +238,7 @@ function solo()
         end
 
         if not (mixer_state == "y" or aux_state == "y" or submix_state == "y" or rt_state == "y"
-                or ref_state == "y" or listenback_state == "y" or rcmaster_state == "y") then
+                or ref_state == "y" or listenback_state == "y" or talkback_state == "y" or rcmaster_state == "y") then
             if IsTrackSelected(track) and parent ~= 1 then
                 SetMediaTrackInfo_Value(track, "I_SOLO", 2)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)

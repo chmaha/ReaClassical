@@ -383,16 +383,17 @@ function solo()
         local live_state = t.live
         local ref_state = t.rcref
         local listenback_state = t.listenback
+        local talkback_state = t.talkback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
         local notes_state = t.notes
 
         local special_states = mixer_state or aux_state or submix_state
             or rt_state or ref_state or live_state
-            or listenback_state or rcmaster_state or playback_state or notes_state
+            or listenback_state or talkback_state or rcmaster_state or playback_state or notes_state
         local special_names = trackname_check(track, "^M:") or trackname_check(track, "^RCMASTER")
             or trackname_check(track, "^@") or trackname_check(track, "^#") or trackname_check(track, "^RoomTone")
-            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF") or trackname_check(track, "^LISTENBACK")
+            or trackname_check(track, "^LIVE") or trackname_check(track, "^REF") or trackname_check(track, "^LISTENBACK") or trackname_check(track, "^TALKBACK")
             or trackname_check(track, "^PLAYBACK") or trackname_check(track, "^NOTES")
 
         if special_states or special_names then
@@ -453,13 +454,14 @@ function mixer()
         local live_state = t.live
         local ref_state = t.rcref
         local listenback_state = t.listenback
+        local talkback_state = t.talkback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
         local notes_state = t.notes
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         local is_special_track = aux_state or submix_state or rt_state or
-            live_state or ref_state or rcmaster_state or listenback_state or playback_state or notes_state
+            live_state or ref_state or rcmaster_state or listenback_state or talkback_state or playback_state or notes_state
 
         local mission_control_tcp_visible = nil
         if is_special_track then
@@ -542,6 +544,11 @@ function mixer()
             SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
         end
 
+        if talkback_state then
+            SetTrackColor(track, colors.talkback)
+            SetMediaTrackInfo_Value(track, "B_SHOWINTCP", 0)
+        end
+
         if notes_state then
             SetTrackColor(track, colors.notes)
             if mission_control_tcp_visible ~= nil then
@@ -552,7 +559,7 @@ function mixer()
         end
 
         if mixer_state or aux_state or submix_state or rcmaster_state
-            or rt_state or live_state or ref_state or listenback_state
+            or rt_state or live_state or ref_state or listenback_state or talkback_state
             or playback_state then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
@@ -970,6 +977,7 @@ function create_track_table(is_empty)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
@@ -1011,6 +1019,9 @@ function create_track_table(is_empty)
         elseif trackname_check(track, "^LISTENBACK") or listenback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "LISTENBACK", true)
+        elseif trackname_check(track, "^TALKBACK") or talkback_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "TALKBACK", true)
         elseif trackname_check(track, "^PLAYBACK") or playback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:playback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "PLAYBACK", true)
@@ -1317,11 +1328,12 @@ function check_hidden_track_items(track_count)
             local _, aux_state = GetSetMediaTrackInfo_String(track, "P_EXT:aux", "", false)
             local _, submix_state = GetSetMediaTrackInfo_String(track, "P_EXT:submix", "", false)
             local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+            local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
             local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
             local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
 
             if mixer_state ~= "" or aux_state ~= "" or submix_state ~= ""
-                or rcmaster_state ~= "" or listenback_state ~= "" or playback_state ~= "" then
+                or rcmaster_state ~= "" or listenback_state ~= "" or talkback_state ~= "" or playback_state ~= "" then
                 local item_count = CountTrackMediaItems(track)
                 if item_count > 0 then
                     return true
@@ -1503,7 +1515,7 @@ end
 function delete_non_rc_tracks()
     local rc_keys = {
         "mix_order", "mixer", "aux", "submix", "roomtone",
-        "live", "rcref", "listenback", "rcmaster", "playback", "notes", "Destination", "Source"
+        "live", "rcref", "listenback", "talkback", "rcmaster", "playback", "notes", "Destination", "Source"
     }
 
     local function is_rc_track(track)

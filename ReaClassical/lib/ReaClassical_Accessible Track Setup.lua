@@ -104,6 +104,7 @@ local ADD_REMOVE_TYPES = {
     { type = "roomtone",    label = "RoomTone",    add_cmd = "addrt",   rm_cmd = "rmrt",   singleton = true },
     { type = "live",        label = "Live",        add_cmd = "addlive", rm_cmd = "rmlive", singleton = true },
     { type = "listenback",  label = "Listenback",  add_channel_prefix = "addlb=", rm_cmd = "rmlb", singleton = true },
+    { type = "talkback",    label = "Talkback",    add_channel_prefix = "addtb=", rm_cmd = "rmtb", singleton = true },
     { type = "playback",    label = "Playback",    add_channel_prefix = "addpb=", rm_cmd = "rmpb", singleton = true },
     { type = "notes",       label = "Notes",       add_cmd = "addnotes", rm_cmd = "rmnotes", singleton = true },
 }
@@ -414,7 +415,7 @@ end
 local mc_tracks = {}
 
 local MC_FIXED_TYPES = {
-    rcmaster = true, roomtone = true, live = true, listenback = true, playback = true,
+    rcmaster = true, roomtone = true, live = true, listenback = true, talkback = true, playback = true,
 }
 
 local MC_ROUTABLE_TYPES = { mixer = true, aux = true, submix = true }
@@ -422,7 +423,7 @@ local MC_ROUTABLE_TYPES = { mixer = true, aux = true, submix = true }
 local MC_TYPE_LABELS = {
     mixer = "Mixer", rcmaster = "RCMASTER", aux = "Aux", submix = "Submix",
     reference = "Reference", roomtone = "RoomTone", live = "Live",
-    listenback = "Listenback", playback = "Playback",
+    listenback = "Listenback", talkback = "Talkback", playback = "Playback",
 }
 
 local function refresh_mc_tracks()
@@ -445,6 +446,7 @@ local function refresh_mc_tracks()
             local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
             local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
             local _, lb_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+            local _, tb_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
             local _, rcm_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
             local _, pb_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
 
@@ -466,6 +468,8 @@ local function refresh_mc_tracks()
                 mc_tracks[#mc_tracks + 1] = { track = track, type = "live", index = 1, label = "" }
             elseif lb_state == "y" then
                 mc_tracks[#mc_tracks + 1] = { track = track, type = "listenback", index = 1, label = "" }
+            elseif tb_state == "y" then
+                mc_tracks[#mc_tracks + 1] = { track = track, type = "talkback", index = 1, label = "" }
             elseif rcm_state == "y" then
                 mc_tracks[#mc_tracks + 1] = { track = track, type = "rcmaster", index = 1, label = "" }
             elseif pb_state == "y" then
@@ -484,6 +488,7 @@ local function mc_target_token(entry)
     if entry.type == "roomtone" then return "rt" end
     if entry.type == "live" then return "live" end
     if entry.type == "listenback" then return "lb" end
+    if entry.type == "talkback" then return "tb" end
     return "pb"
 end
 

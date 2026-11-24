@@ -29,7 +29,7 @@ local say = require("ReaClassical_Announce")
 
 local main, announce_selected_envelope
 
-local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback" }
+local SPECIAL_PEXTS = { "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "talkback" }
 
 local function is_special_track(t)
     for _, pext in ipairs(SPECIAL_PEXTS) do

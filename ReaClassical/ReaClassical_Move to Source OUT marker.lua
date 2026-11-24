@@ -127,7 +127,7 @@ function solo()
     Main_OnCommand(40491, 0)
     for i = 0, CountTracks(0) - 1 do
         local track = GetTrack(0, i)
-        if cache.tags[track].listenback then
+        if cache.tags[track].listenback or cache.tags[track].talkback then
             set_track_value(track, "I_RECARM", 1)
         end
     end
@@ -143,12 +143,13 @@ function solo()
         local rt_state = t.roomtone
         local ref_state = t.rcref
         local listenback_state = t.listenback
+        local talkback_state = t.talkback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
         local notes_state = t.notes
 
         if mixer_state or aux_state or submix_state or rt_state
-            or ref_state or listenback_state or playback_state or notes_state then
+            or ref_state or listenback_state or talkback_state or playback_state or notes_state then
             local num_of_sends = GetTrackNumSends(track, 0)
             for j = 0, num_of_sends - 1, 1 do
                 set_send_value(track, 0, j, "B_MUTE", 0)
@@ -156,7 +157,7 @@ function solo()
         end
 
         if not (mixer_state or aux_state or submix_state or rt_state
-                or ref_state or listenback_state or rcmaster_state or playback_state or notes_state) then
+                or ref_state or listenback_state or talkback_state or rcmaster_state or playback_state or notes_state) then
             if IsTrackSelected(track) and parent ~= 1 then
                 set_track_value(track, "I_SOLO", 2)
                 set_track_value(track, "B_MUTE", 0)

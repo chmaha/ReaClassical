@@ -346,12 +346,13 @@ function solo()
         local live_state = t.live
         local ref_state = t.rcref
         local listenback_state = t.listenback
+        local talkback_state = t.talkback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
         local notes_state = t.notes
 
         if IsTrackSelected(track) == false and not mixer_state and not aux_state and not submix_state
-            and not rt_state and not live_state and not listenback_state and not rcmaster_state
+            and not rt_state and not live_state and not listenback_state and not talkback_state and not rcmaster_state
             and not playback_state and not notes_state then
             set_track_value(track, "I_SOLO", 0)
             set_track_value(track, "B_MUTE", 1)
@@ -389,13 +390,14 @@ function mixer()
         local live_state = t.live
         local ref_state = t.rcref
         local listenback_state = t.listenback
+        local talkback_state = t.talkback
         local rcmaster_state = t.rcmaster
         local playback_state = t.playback
         local notes_state = t.notes
         local _, guid = GetSetMediaTrackInfo_String(track, "GUID", "", false)
 
         local is_special_track = aux_state or submix_state or rt_state or
-            live_state or ref_state or rcmaster_state or listenback_state or playback_state or notes_state
+            live_state or ref_state or rcmaster_state or listenback_state or talkback_state or playback_state or notes_state
 
         local mission_control_tcp_visible = nil
         if is_special_track then
@@ -483,7 +485,7 @@ function mixer()
         end
 
         if mixer_state or aux_state or submix_state or rcmaster_state
-            or rt_state or live_state or ref_state or listenback_state
+            or rt_state or live_state or ref_state or listenback_state or talkback_state
             or playback_state then
             SetMediaTrackInfo_Value(track, 'B_SHOWINMIXER', 1)
         else
@@ -593,10 +595,11 @@ function clear_all_rec_armed_except_live(workflow)
         local track = GetTrack(0, i)
         local _, live_flag = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, lb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, tb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
 
         if live_flag == "y" and workflow == "Horizontal" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
-        elseif lb_flag == "y" then
+        elseif lb_flag == "y" or tb_flag == "y" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
             SetMediaTrackInfo_Value(track, "I_RECMODE", 2)
         else
@@ -691,8 +694,9 @@ function set_rec_arm_for_selected_tracks(state)
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         local _, lb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, tb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
 
-        if lb_flag == "y" then
+        if lb_flag == "y" or tb_flag == "y" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 1)
         elseif IsTrackSelected(track) then
             local mixer_track = find_mixer_track_for_track(track)

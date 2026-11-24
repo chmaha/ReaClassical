@@ -35,7 +35,8 @@ local function main()
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
         local _, lb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
-        if lb_flag ~= "y" then
+        local _, tb_flag = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
+        if lb_flag ~= "y" and tb_flag ~= "y" then
             SetMediaTrackInfo_Value(track, "I_RECARM", 0)
         end
     end

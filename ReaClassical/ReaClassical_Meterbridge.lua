@@ -224,7 +224,7 @@ function is_other_master_track(name)
 end
 
 function is_special_track(track)
-  local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback", "notes" }
+  local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "talkback", "rcmaster", "playback", "notes" }
   for _, key in ipairs(keys) do
     local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
     if val == "y" then return true end

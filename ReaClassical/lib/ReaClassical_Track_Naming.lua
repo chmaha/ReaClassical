@@ -46,6 +46,7 @@ local function humanize_track_name(name)
     if rest then return rest ~= "" and ("Reference " .. rest) or "Reference" end
 
     if name == "LISTENBACK" then return "Listen back" end
+    if name == "TALKBACK" then return "Talk back" end
     if name == "RCMASTER" then return "RC Master" end
 
     return name

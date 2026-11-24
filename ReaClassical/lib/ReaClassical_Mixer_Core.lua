@@ -116,13 +116,14 @@ function M.get_special_tracks()
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
 
         if aux_state == "y" or submix_state == "y" or rt_state == "y" or ref_state == "y"
-            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y"
+            or live_state == "y" or rcmaster_state == "y" or listenback_state == "y" or talkback_state == "y"
             or playback_state == "y" or notes_state == "y" then
             local track_type = "other"
             local has_routing = false
@@ -141,6 +142,8 @@ function M.get_special_tracks()
                 track_type = "live"
             elseif listenback_state == "y" then
                 track_type = "listenback"
+            elseif talkback_state == "y" then
+                track_type = "talkback"
             elseif rcmaster_state == "y" then
                 track_type = "rcmaster"
             elseif playback_state == "y" then
@@ -161,7 +164,7 @@ function M.get_special_tracks()
                 display_name = ""
             elseif track_type == "live" then
                 display_name = ""
-            elseif track_type == "listenback" then
+            elseif track_type == "listenback" or track_type == "talkback" then
                 display_name = ""
             elseif track_type == "rcmaster" then
                 display_name = ""
@@ -191,8 +194,9 @@ function M.get_special_tracks()
         live = 5,
         reference = 6,
         listenback = 7,
-        playback = 8,
-        notes = 9
+        talkback = 8,
+        playback = 9,
+        notes = 10
     }
 
     table.sort(tracks, function(a, b)
@@ -253,6 +257,7 @@ function M.build_track_table(is_empty)
         local _, live_state = GetSetMediaTrackInfo_String(track, "P_EXT:live", "", false)
         local _, ref_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcref", "", false)
         local _, listenback_state = GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "", false)
+        local _, talkback_state = GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "", false)
         local _, rcmaster_state = GetSetMediaTrackInfo_String(track, "P_EXT:rcmaster", "", false)
         local _, playback_state = GetSetMediaTrackInfo_String(track, "P_EXT:playback", "", false)
         local _, notes_state = GetSetMediaTrackInfo_String(track, "P_EXT:notes", "", false)
@@ -294,6 +299,9 @@ function M.build_track_table(is_empty)
         elseif M.trackname_check(track, "^LISTENBACK") or listenback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:listenback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "LISTENBACK", true)
+        elseif M.trackname_check(track, "^TALKBACK") or talkback_state == "y" then
+            GetSetMediaTrackInfo_String(track, "P_EXT:talkback", "y", true)
+            GetSetMediaTrackInfo_String(track, "P_NAME", "TALKBACK", true)
         elseif M.trackname_check(track, "^PLAYBACK") or playback_state == "y" then
             GetSetMediaTrackInfo_String(track, "P_EXT:playback", "y", true)
             GetSetMediaTrackInfo_String(track, "P_NAME", "PLAYBACK", true)
@@ -443,6 +451,11 @@ function M.resolve_target(token)
         return info and info.track, err
     end
 
+    if token == "tb" then
+        local info, err = M.resolve_special_index(M.get_special_tracks_by_type("talkback"), "", "Talkback", "")
+        return info and info.track, err
+    end
+
     if token == "pb" then
         local info, err = M.resolve_special_index(M.get_special_tracks_by_type("playback"), "", "Playback", "")
         return info and info.track, err
@@ -543,6 +556,11 @@ function M.resolve_target_list(token)
         return info and { info.track } or {}, err
     end
 
+    if token == "tb" then
+        local info, err = M.resolve_special_index(M.get_special_tracks_by_type("talkback"), "", "Talkback", "")
+        return info and { info.track } or {}, err
+    end
+
     if token == "pb" then
         local info, err = M.resolve_special_index(M.get_special_tracks_by_type("playback"), "", "Playback", "")
         return info and { info.track } or {}, err
@@ -562,6 +580,8 @@ function M.split_word_target(cmd)
     if rest then return "live", rest end
     rest = cmd:match("^lb(.*)$")
     if rest then return "lb", rest end
+    rest = cmd:match("^tb(.*)$")
+    if rest then return "tb", rest end
     rest = cmd:match("^pb(.*)$")
     if rest then return "pb", rest end
     return nil, nil

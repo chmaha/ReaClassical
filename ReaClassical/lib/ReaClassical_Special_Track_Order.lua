@@ -47,6 +47,8 @@ local function classify(track)
         return "roomtone"
     elseif ext(track, "listenback") == "y" or name:match("^LISTENBACK") then
         return "listenback"
+    elseif ext(track, "talkback") == "y" or name:match("^TALKBACK") then
+        return "talkback"
     elseif ext(track, "playback") == "y" or name:match("^PLAYBACK") then
         return "playback"
     elseif ext(track, "notes") == "y" or name:match("^NOTES") then
@@ -78,7 +80,7 @@ function M.reorder()
     local rcmaster_track = nil
     local m_tracks, routing_tracks, roomtone_tracks = {}, {}, {}
     local live_tracks, ref_tracks, listenback_tracks, playback_tracks = {}, {}, {}, {}
-    local notes_tracks = {}
+    local notes_tracks, talkback_tracks = {}, {}
 
     for i = 0, num_tracks - 1 do
         local track = GetTrack(0, i)
@@ -97,6 +99,8 @@ function M.reorder()
             roomtone_tracks[#roomtone_tracks + 1] = track
         elseif kind == "listenback" then
             listenback_tracks[#listenback_tracks + 1] = track
+        elseif kind == "talkback" then
+            talkback_tracks[#talkback_tracks + 1] = track
         elseif kind == "playback" then
             playback_tracks[#playback_tracks + 1] = track
         elseif kind == "notes" then
@@ -143,6 +147,11 @@ function M.reorder()
 
     Main_OnCommand(40297, 0)
     for _, t in ipairs(listenback_tracks) do SetTrackSelected(t, true) end
+    ReorderSelectedTracks(CountTracks(0), 0)
+    Main_OnCommand(40297, 0)
+
+    Main_OnCommand(40297, 0)
+    for _, t in ipairs(talkback_tracks) do SetTrackSelected(t, true) end
     ReorderSelectedTracks(CountTracks(0), 0)
     Main_OnCommand(40297, 0)
 

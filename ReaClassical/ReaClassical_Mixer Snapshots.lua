@@ -122,7 +122,7 @@ end
 function is_special_track(track)
   local checks = {
     "P_EXT:mixer", "P_EXT:rcmaster", "P_EXT:aux", "P_EXT:submix",
-    "P_EXT:roomtone", "P_EXT:rcref", "P_EXT:live", "P_EXT:listenback"
+    "P_EXT:roomtone", "P_EXT:rcref", "P_EXT:live", "P_EXT:listenback", "P_EXT:talkback"
   }
   for _, key in ipairs(checks) do
     local _, v = GetSetMediaTrackInfo_String(track, key, "", false)

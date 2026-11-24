@@ -91,7 +91,8 @@ do
     for i = 0, n - 1 do
         local t = GetTrack(0, i)
         local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
-        if lb == "y" then SetMediaTrackInfo_Value(t, "I_RECARM", 1) end
+        local _, tb = GetSetMediaTrackInfo_String(t, "P_EXT:talkback", "", false)
+        if lb == "y" or tb == "y" then SetMediaTrackInfo_Value(t, "I_RECARM", 1) end
     end
 end
 
@@ -462,12 +463,13 @@ local function disarm_all_tracks()
     for i = 0, n - 1 do
         local t = GetTrack(0, i)
         local _, lb = GetSetMediaTrackInfo_String(t, "P_EXT:listenback", "", false)
-        if lb == "y" then SetMediaTrackInfo_Value(t, "I_RECARM", 1) end
+        local _, tb = GetSetMediaTrackInfo_String(t, "P_EXT:talkback", "", false)
+        if lb == "y" or tb == "y" then SetMediaTrackInfo_Value(t, "I_RECARM", 1) end
     end
 end
 
 local function clip_is_special_track(track)
-    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "rcmaster", "playback", "notes" }
+    local keys = { "mixer", "aux", "submix", "roomtone", "live", "rcref", "listenback", "talkback", "rcmaster", "playback", "notes" }
     for _, key in ipairs(keys) do
         local _, val = GetSetMediaTrackInfo_String(track, "P_EXT:" .. key, "", false)
         if val == "y" then return true end

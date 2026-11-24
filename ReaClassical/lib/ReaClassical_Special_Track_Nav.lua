@@ -29,7 +29,7 @@ local say = require("ReaClassical_Announce")
 local M = {}
 
 local SPECIAL_PEXTS = {
-    "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "rcmaster", "playback",
+    "mixer", "aux", "submix", "roomtone", "rcref", "live", "listenback", "talkback", "rcmaster", "playback",
 }
 
 function M.is_special_track(t)
@@ -94,6 +94,8 @@ function M.announce_special(t, pext)
         label = "room tone"
     elseif pext == "listenback" then
         label = "listenback"
+    elseif pext == "talkback" then
+        label = "talkback"
     elseif pext == "playback" then
         label = "playback"
     elseif pext == "rcmaster" then
@@ -143,7 +145,7 @@ function M.ensure_special_visible()
         for _, pext in ipairs(SPECIAL_PEXTS) do
             local _, v = GetSetMediaTrackInfo_String(t, "P_EXT:" .. pext, "", false)
             if v == "y" then
-                if pext ~= "listenback" and pext ~= "playback" then
+                if pext ~= "listenback" and pext ~= "talkback" and pext ~= "playback" then
                     SetMediaTrackInfo_Value(t, "B_SHOWINTCP", 1)
                 end
                 break
