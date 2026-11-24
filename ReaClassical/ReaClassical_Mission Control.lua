@@ -161,6 +161,7 @@ local special_track_order = dofile(script_path .. "lib/ReaClassical_Special_Trac
 local spare_track = dofile(script_path .. "lib/ReaClassical_Spare_Track.lua")
 local notes_track = dofile(script_path .. "lib/ReaClassical_Notes_Track.lua")
 local talkback_track = dofile(script_path .. "lib/ReaClassical_Talkback_Track.lua")
+local cue_solo = dofile(script_path .. "lib/ReaClassical_Cue_Solo.lua")
 
 local function row_select_area(ctx, label, end_x, is_selected)
     local sx, sy = ImGui.GetCursorScreenPos(ctx)
@@ -652,9 +653,16 @@ function main()
                             num_channels = 1
                         end
 
+                        local trim_db = 0.0
+                        if GetTrackNumSends(aux_info.track, 1) > 0 then
+                            local vol = GetTrackSendInfo_Value(aux_info.track, 1, 0, "D_VOL")
+                            if vol > 0 then trim_db = 20 * math.log(vol, 10) end
+                        end
+
                         pending_hw_routing_changes.special[idx] = {
                             hw_channel = -1,
-                            num_channels = num_channels
+                            num_channels = num_channels,
+                            trim_db = trim_db
                         }
                         local first_hw = next(fresh_hw)
                         if first_hw then
@@ -886,6 +894,22 @@ function main()
 
             ImGui.Separator(ctx)
 
+            local cue_on = cue_solo.enabled()
+            local cue_changed, cue_new = ImGui.Checkbox(ctx, "Solo-safe RCMASTER outputs", cue_on)
+            if cue_changed then
+                Undo_BeginBlock()
+                cue_solo.set_enabled(cue_new)
+                Undo_EndBlock(cue_new and "Enable solo-safe RCMASTER outputs" or "Disable solo-safe RCMASTER outputs", -1)
+            end
+            if ImGui.IsItemHovered(ctx, ImGui.HoveredFlags_AllowWhenDisabled) then
+                ImGui.SetTooltip(ctx, "ReaClassical solo only changes what you hear on the REAPER master outputs.\n"
+                    .. "RCMASTER's hardware outputs and the LIVE bounce always carry the full mix\n"
+                    .. "(e.g. a feed to a video team). Soloed tracks bypass RCMASTER FX.\n"
+                    .. "Use ReaClassical solo controls: REAPER's own mixer solo buttons still affect every output.")
+            end
+
+            ImGui.Separator(ctx)
+
             ImGui.Text(ctx, "Special Tracks:")
 
             for idx, aux_info in ipairs(aux_submix_tracks) do
@@ -1011,6 +1035,27 @@ function main()
                         end
                     end
 
+                    ImGui.SameLine(ctx)
+                    ImGui.SetNextItemWidth(ctx, 90)
+                    local trim_changed, new_trim = ImGui.DragDouble(ctx, "##hw_special_trim",
+                        pending_hw_routing_changes.special[idx].trim_db or 0.0, 0.1, -60.0, 12.0, "%.1f dB")
+                    if trim_changed then
+                        pending_hw_routing_changes.special[idx].trim_db = new_trim
+                    end
+                    if ImGui.IsItemHovered(ctx) then
+                        ImGui.SetTooltip(ctx, "Output trim (drag, or Ctrl+click to type).\n"
+                            .. "Right-click for presets, e.g. -11.8 dB for a +4 dBu interface into a -10 dBV input")
+                    end
+                    if ImGui.BeginPopupContextItem(ctx, "##hw_trim_presets") then
+                        if ImGui.MenuItem(ctx, "0 dB") then
+                            pending_hw_routing_changes.special[idx].trim_db = 0.0
+                        end
+                        if ImGui.MenuItem(ctx, "-11.8 dB (+4 dBu to -10 dBV)") then
+                            pending_hw_routing_changes.special[idx].trim_db = -11.8
+                        end
+                        ImGui.EndPopup(ctx)
+                    end
+
                     ImGui.PopID(ctx)
                 end
             end
@@ -1074,6 +1119,10 @@ function main()
                             SetTrackSendInfo_Value(aux_info.track, 1, send_idx, "I_DSTCHAN",
                                 changes.hw_channel)
                             SetTrackSendInfo_Value(aux_info.track, 1, send_idx, "I_SRCCHAN", 0)
+                        end
+                        if changes.hw_channel >= 0 and GetTrackNumSends(aux_info.track, 1) > 0 then
+                            SetTrackSendInfo_Value(aux_info.track, 1, 0, "D_VOL",
+                                10 ^ ((changes.trim_db or 0.0) / 20))
                         end
                     end
                 end
@@ -1507,7 +1556,7 @@ function main()
                         if ImGui.IsItemHovered(ctx) then
                             local out = talkback_track.get_output(aux_info.track)
                             ImGui.SetTooltip(ctx, "Talkback mic input (never recorded, not in the mix)\n"
-                                .. "Output: " .. (out and tostring(out + 1) or "none - set in Hardware Routing")
+                                .. "Output: " .. (out and tostring(out + 1) or "none - set in HW Outputs")
                                 .. "\nUnmute (M) or run Toggle Talkback to talk")
                         end
                     elseif aux_info.type == "playback" then
@@ -1578,7 +1627,7 @@ function main()
                     end
 
                     ImGui.SameLine(ctx)
-                    local is_soloed = GetMediaTrackInfo_Value(aux_info.track, "I_SOLO") > 0
+                    local is_soloed = cue_solo.is_soloed(aux_info.track)
                     if is_soloed then
                         ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)
                         ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF)
@@ -1586,7 +1635,7 @@ function main()
                         ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)
                     end
                     if ImGui.Button(ctx, "S##auxsolo" .. idx, 25, 0) then
-                        SetMediaTrackInfo_Value(aux_info.track, "I_SOLO", is_soloed and 0 or 2)
+                        cue_solo.set(aux_info.track, not is_soloed)
                     end
                     if is_soloed then
                         ImGui.PopStyleColor(ctx, 4)
@@ -3314,7 +3363,7 @@ function draw_track_controls(start_idx, end_idx)
         end
 
         ImGui.SameLine(ctx)
-        local is_soloed = GetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO") > 0
+        local is_soloed = cue_solo.is_soloed(track_info.mixer_track)
         if is_soloed then
             ImGui.PushStyleColor(ctx, ImGui.Col_Button, 0xFFFF00FF)
             ImGui.PushStyleColor(ctx, ImGui.Col_ButtonHovered, 0xFFFF66FF)
@@ -3322,7 +3371,7 @@ function draw_track_controls(start_idx, end_idx)
             ImGui.PushStyleColor(ctx, ImGui.Col_Text, 0x000000FF)
         end
         if ImGui.Button(ctx, "S##solo" .. i, 25, 0) then
-            SetMediaTrackInfo_Value(track_info.mixer_track, "I_SOLO", is_soloed and 0 or 2)
+            cue_solo.set(track_info.mixer_track, not is_soloed)
         end
         if is_soloed then
             ImGui.PopStyleColor(ctx, 4)

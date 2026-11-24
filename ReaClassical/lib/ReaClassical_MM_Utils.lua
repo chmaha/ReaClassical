@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local track_rename = require("ReaClassical_Track_Rename")
+local cue_solo = require("ReaClassical_Cue_Solo")
 
 local M = {}
 
@@ -196,7 +197,7 @@ end
 
 function M.format_mute_solo(track)
     local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
-    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+    local soloed = cue_solo.is_soloed(track)
     if muted and soloed then return "muted and soloed" end
     if muted then return "muted" end
     if soloed then return "soloed" end
@@ -205,7 +206,7 @@ end
 
 function M.status_suffix(track)
     local bits = {}
-    if GetMediaTrackInfo_Value(track, "I_SOLO") > 0 then bits[#bits + 1] = "Soloed" end
+    if cue_solo.is_soloed(track) then bits[#bits + 1] = "Soloed" end
     if GetMediaTrackInfo_Value(track, "B_MUTE") > 0 then bits[#bits + 1] = "Muted" end
     if #bits == 0 then return "" end
     return ", " .. table.concat(bits, ", ")
@@ -248,7 +249,7 @@ M.input_status_text = input_status_text
 
 function M.full_status_text(track)
     local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
-    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+    local soloed = cue_solo.is_soloed(track)
     local phase = GetMediaTrackInfo_Value(track, "B_PHASE") == 1
     local pan = M.format_pan(GetMediaTrackInfo_Value(track, "D_PAN"))
     local db = M.linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL"))

@@ -26,6 +26,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local say = require("ReaClassical_Announce")
 local mm  = require("ReaClassical_MM_Utils")
+local cue_solo = require("ReaClassical_Cue_Solo")
 
 local list = mm.get_special_tracks_list()
 if #list == 0 then
@@ -35,7 +36,8 @@ end
 
 Undo_BeginBlock()
 for _, t in ipairs(list) do
-    SetMediaTrackInfo_Value(t, "I_SOLO", 0)
+    cue_solo.set(t, false)
 end
+cue_solo.clear_all()
 Undo_EndBlock("Unsolo All Tracks", -1)
 say("All tracks unsoloed")

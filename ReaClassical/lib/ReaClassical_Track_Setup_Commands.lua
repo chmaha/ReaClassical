@@ -32,6 +32,7 @@ local mixer_core = require("ReaClassical_Mixer_Core")
 local spare_track = require("ReaClassical_Spare_Track")
 local notes_track = require("ReaClassical_Notes_Track")
 local talkback_track = require("ReaClassical_Talkback_Track")
+local cue_solo = require("ReaClassical_Cue_Solo")
 
 local M = {}
 
@@ -1006,6 +1007,20 @@ function M.try_routing_fx(cmd)
             end
         end
         say("Auto-assigned hardware outputs for " .. assigned_count .. " track" .. (assigned_count == 1 and "" or "s"))
+        return true
+    end
+
+    if cmd == "cuesolo=on" or cmd == "cuesolo=off" then
+        local on = cmd == "cuesolo=on"
+        Undo_BeginBlock()
+        cue_solo.set_enabled(on)
+        Undo_EndBlock(on and "Enable solo-safe RCMASTER outputs" or "Disable solo-safe RCMASTER outputs", -1)
+        say(on and "Solo-safe RCMASTER outputs on" or "Solo-safe RCMASTER outputs off")
+        return true
+    end
+
+    if cmd == "cuesolo?" then
+        say("Solo-safe RCMASTER outputs " .. (cue_solo.enabled() and "on" or "off"))
         return true
     end
 

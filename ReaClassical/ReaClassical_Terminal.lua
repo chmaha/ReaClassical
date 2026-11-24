@@ -27,6 +27,7 @@ package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. 
 local humanize_track_name = require("ReaClassical_Track_Naming")
 local smart_import_scan = require("ReaClassical_Smart_Import_Scan")
 local mixer_core = require("ReaClassical_Mixer_Core")
+local cue_solo = require("ReaClassical_Cue_Solo")
 local track_setup_commands = require("ReaClassical_Track_Setup_Commands")
 
 local workflow = ""
@@ -72,10 +73,10 @@ function try_mute_solo(cmd)
             local group_names
             tracks, group_names = mixer_core.expand_with_groups(tracks, "solo")
             for _, track in ipairs(mixer_core.get_mixer_tracks()) do
-                SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+                cue_solo.set(track, false)
                 SetMediaTrackInfo_Value(track, "B_MUTE", 0)
             end
-            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+            for _, track in ipairs(tracks) do cue_solo.set(track, true) end
             say("Soloed " .. mixer_core.track_names_str(tracks) .. mixer_core.group_names_suffix(group_names))
             return true
         elseif word_op == "m" or word_op == "um" or word_op == "s" or word_op == "us" then
@@ -90,10 +91,10 @@ function try_mute_solo(cmd)
                 for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 0) end
                 op_word = "Unmuted"
             elseif word_op == "s" then
-                for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+                for _, track in ipairs(tracks) do cue_solo.set(track, true) end
                 op_word = "Soloed"
             else
-                for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 0) end
+                for _, track in ipairs(tracks) do cue_solo.set(track, false) end
                 op_word = "Unsoloed"
             end
             say(op_word .. " " .. mixer_core.track_names_str(tracks) .. mixer_core.group_names_suffix(group_names))
@@ -122,7 +123,7 @@ function try_mute_solo(cmd)
                     local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
                     say(prefix .. "mute: " .. (muted and "on" or "off"))
                 else
-                    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+                    local soloed = cue_solo.is_soloed(track)
                     say(prefix .. "solo: " .. (soloed and "on" or "off"))
                 end
             end
@@ -140,11 +141,11 @@ function try_mute_solo(cmd)
         local group_names
         tracks, group_names = mixer_core.expand_with_groups(tracks, "solo")
         for _, track in ipairs(mixer_core.get_mixer_tracks()) do
-            SetMediaTrackInfo_Value(track, "I_SOLO", 0)
+            cue_solo.set(track, false)
             SetMediaTrackInfo_Value(track, "B_MUTE", 0)
         end
         for _, track in ipairs(tracks) do
-            SetMediaTrackInfo_Value(track, "I_SOLO", 2)
+            cue_solo.set(track, true)
         end
         say("Soloed " .. mixer_core.track_names_str(tracks) .. mixer_core.group_names_suffix(group_names))
         return true
@@ -168,10 +169,10 @@ function try_mute_solo(cmd)
             for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "B_MUTE", 0) end
             op_word = "Unmuted"
         elseif op == "s" then
-            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 2) end
+            for _, track in ipairs(tracks) do cue_solo.set(track, true) end
             op_word = "Soloed"
         elseif op == "us" then
-            for _, track in ipairs(tracks) do SetMediaTrackInfo_Value(track, "I_SOLO", 0) end
+            for _, track in ipairs(tracks) do cue_solo.set(track, false) end
             op_word = "Unsoloed"
         end
         say(op_word .. " " .. mixer_core.track_names_str(tracks) .. mixer_core.group_names_suffix(group_names))
@@ -225,7 +226,7 @@ function try_mute_solo(cmd)
                 local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
                 say(prefix .. "mute: " .. (muted and "on" or "off"))
             else
-                local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+                local soloed = cue_solo.is_soloed(track)
                 say(prefix .. "solo: " .. (soloed and "on" or "off"))
             end
         end

@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local au = require("ReaClassical_Automation_Info")
+local cue_solo = require("ReaClassical_Cue_Solo")
 
 local M = {}
 
@@ -216,7 +217,11 @@ function M.get_track_state(track)
     state.volume = GetMediaTrackInfo_Value(track, "D_VOL")
     state.pan = GetMediaTrackInfo_Value(track, "D_PAN")
     state.mute = GetMediaTrackInfo_Value(track, "B_MUTE")
-    state.solo = GetMediaTrackInfo_Value(track, "I_SOLO")
+    if cue_solo.applies_to(track) then
+        state.solo = cue_solo.is_soloed(track) and 2 or 0
+    else
+        state.solo = GetMediaTrackInfo_Value(track, "I_SOLO")
+    end
     state.phase = GetMediaTrackInfo_Value(track, "B_PHASE")
     state.width = GetMediaTrackInfo_Value(track, "D_WIDTH")
     state.guid = GetTrackGUID(track)
@@ -265,7 +270,7 @@ function M.apply_track_state(track, state, flags)
     if flags.volume then SetMediaTrackInfo_Value(track, "D_VOL", state.volume) end
     if flags.pan then SetMediaTrackInfo_Value(track, "D_PAN", state.pan) end
     if flags.mute then SetMediaTrackInfo_Value(track, "B_MUTE", state.mute) end
-    if flags.solo then SetMediaTrackInfo_Value(track, "I_SOLO", state.solo) end
+    if flags.solo then cue_solo.set(track, state.solo > 0, state.solo) end
     if flags.phase then SetMediaTrackInfo_Value(track, "B_PHASE", state.phase) end
     if flags.width and state.width then
         SetMediaTrackInfo_Value(track, "D_WIDTH", state.width)

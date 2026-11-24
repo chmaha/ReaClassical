@@ -49,6 +49,7 @@ local track_scan = require("ReaClassical_Track_Scan")
 local track_write = require("ReaClassical_Track_Write")
 local special_track_order = require("ReaClassical_Special_Track_Order")
 local spare_track = require("ReaClassical_Spare_Track")
+local cue_solo = require("ReaClassical_Cue_Solo")
 local notes_track = require("ReaClassical_Notes_Track")
 
 local function color_folders(track_table)
@@ -339,6 +340,7 @@ function main()
         local first_track = GetTrack(0, 0)
         if first_track then SetTrackSelected(first_track, true) end
     end
+    cue_solo.refresh()
     if not suppress_undo then Undo_EndBlock('Vertical Workflow', -1) end
     UpdateArrange()
     UpdateTimeline()

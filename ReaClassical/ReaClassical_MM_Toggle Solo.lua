@@ -27,6 +27,7 @@ package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. 
 local say = require("ReaClassical_Announce")
 local mm  = require("ReaClassical_MM_Utils")
 local groups = require("ReaClassical_MM_Groups")
+local cue_solo = require("ReaClassical_Cue_Solo")
 
 local track = mm.get_current_target()
 if not track then
@@ -35,9 +36,8 @@ if not track then
 end
 
 local targets, grouped, group_name = groups.get_action_targets(track, "solo")
-local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
-local new_state = soloed and 0 or 2
+local soloed = cue_solo.is_soloed(track)
 for _, t in ipairs(targets) do
-    SetMediaTrackInfo_Value(t, "I_SOLO", new_state)
+    cue_solo.set(t, not soloed)
 end
 say((soloed and "Solo off" or "Solo on") .. (grouped and (", " .. group_name .. " group") or ""))

@@ -47,6 +47,7 @@ local track_scan = require("ReaClassical_Track_Scan")
 local track_write = require("ReaClassical_Track_Write")
 local special_track_order = require("ReaClassical_Special_Track_Order")
 local spare_track = require("ReaClassical_Spare_Track")
+local cue_solo = require("ReaClassical_Cue_Solo")
 local notes_track = require("ReaClassical_Notes_Track")
 
 function main()
@@ -222,6 +223,7 @@ function main()
         if first_track then SetTrackSelected(first_track, true) end
     end
 
+    cue_solo.refresh()
     Undo_EndBlock('Horizontal Workflow', -1)
     UpdateArrange()
     UpdateTimeline()

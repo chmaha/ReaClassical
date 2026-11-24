@@ -26,6 +26,7 @@ local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;" .. script_path .. "lib/?.lua;"
 local humanize_track_name = require("ReaClassical_Track_Naming")
 local say = require("ReaClassical_Announce")
+local cue_solo = require("ReaClassical_Cue_Solo")
 local folder_scan = require("ReaClassical_Folder_Scan")
 local spare_track = require("ReaClassical_Spare_Track")
 
@@ -89,19 +90,17 @@ end
 
 function apply_solo_for_special(t, pext)
     if pext == "rcref" then
-        Main_OnCommand(40340, 0)
         SetMediaTrackInfo_Value(t, "B_MUTE", 0)
-        SetMediaTrackInfo_Value(t, "I_SOLO", 1)
+        cue_solo.exclusive(t, 1)
     elseif pext == "live" then
-        Main_OnCommand(40340, 0)
         SetMediaTrackInfo_Value(t, "B_MUTE", 0)
-        SetMediaTrackInfo_Value(t, "I_SOLO", 2)
+        cue_solo.exclusive(t, 2)
     end
 end
 
 local function clear_solo_if_special(t, pext)
     if pext == "rcref" or pext == "live" then
-        Main_OnCommand(40340, 0)
+        cue_solo.unsolo_everything()
         SetMediaTrackInfo_Value(t, "B_MUTE", 1)
     end
 end
@@ -131,7 +130,7 @@ end
 
 function format_mute_solo(track)
     local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
-    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+    local soloed = cue_solo.is_soloed(track)
     if muted and soloed then return "muted and soloed" end
     if muted then return "muted" end
     if soloed then return "soloed" end

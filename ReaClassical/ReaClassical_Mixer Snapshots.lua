@@ -58,6 +58,7 @@ package.path = ImGui_GetBuiltinPath() .. '/?.lua;' .. script_path .. 'lib/?.lua;
 local ImGui     = require 'imgui' '0.10'
 local snap_info = require 'ReaClassical_Mixer_Snapshot_Info'
 local engine = require 'ReaClassical_Snapshot_Engine'
+local cue_solo = require("ReaClassical_Cue_Solo")
 local snap_automation = require 'ReaClassical_Snapshot_Automation'
 
 local ctx                     = ImGui.CreateContext(script_name)
@@ -195,7 +196,8 @@ function get_track_state(track)
   state.volume = GetMediaTrackInfo_Value(track, "D_VOL")
   state.pan = GetMediaTrackInfo_Value(track, "D_PAN")
   state.mute = GetMediaTrackInfo_Value(track, "B_MUTE")
-  state.solo = GetMediaTrackInfo_Value(track, "I_SOLO")
+  state.solo = cue_solo.applies_to(track) and (cue_solo.is_soloed(track) and 2 or 0)
+      or GetMediaTrackInfo_Value(track, "I_SOLO")
   state.phase = GetMediaTrackInfo_Value(track, "B_PHASE")
   state.width = GetMediaTrackInfo_Value(track, "D_WIDTH")
   state.guid = GetTrackGUID(track)

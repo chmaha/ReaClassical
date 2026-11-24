@@ -25,6 +25,7 @@ for key in pairs(reaper) do _G[key] = reaper[key] end
 local script_path = debug.getinfo(1, "S").source:match("@(.+[\\/])")
 package.path = package.path .. ";" .. script_path .. "?.lua;"
 local say          = require("ReaClassical_Announce")
+local cue_solo = require("ReaClassical_Cue_Solo")
 local gui_mode = require("ReaClassical_GuiMode")
 local track_rename = require("ReaClassical_Track_Rename")
 local af           = require("ReaClassical_Accessible_Focus")
@@ -542,7 +543,7 @@ end
 
 local function status_suffix(track)
     local bits = {}
-    if GetMediaTrackInfo_Value(track, "I_SOLO") > 0 then bits[#bits + 1] = "Soloed" end
+    if cue_solo.is_soloed(track) then bits[#bits + 1] = "Soloed" end
     if GetMediaTrackInfo_Value(track, "B_MUTE") > 0 then bits[#bits + 1] = "Muted" end
     if #bits == 0 then return "" end
     return ", " .. table.concat(bits, ", ")
@@ -635,7 +636,7 @@ local function announce_mixer_status()
     local track = entry.track
     local display = mc_display(entry)
     local muted = GetMediaTrackInfo_Value(track, "B_MUTE") > 0
-    local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
+    local soloed = cue_solo.is_soloed(track)
     local phase = GetMediaTrackInfo_Value(track, "B_PHASE") == 1
     local pan = format_pan(GetMediaTrackInfo_Value(track, "D_PAN"))
     local db = linear_to_db(GetMediaTrackInfo_Value(track, "D_VOL"))
@@ -1425,8 +1426,8 @@ local function handle_key(char)
             SetMediaTrackInfo_Value(track, "B_MUTE", muted and 0 or 1)
             say(muted and "Mute off" or "Mute on")
         elseif char == 115 then
-            local soloed = GetMediaTrackInfo_Value(track, "I_SOLO") > 0
-            SetMediaTrackInfo_Value(track, "I_SOLO", soloed and 0 or 2)
+            local soloed = cue_solo.is_soloed(track)
+            cue_solo.set(track, not soloed)
             say(soloed and "Solo off" or "Solo on")
         elseif char == 112 then
             local phase = GetMediaTrackInfo_Value(track, "B_PHASE") == 1
@@ -1484,8 +1485,9 @@ local function handle_key(char)
         elseif char == 83 then
             Undo_BeginBlock()
             for _, e in ipairs(mc_tracks) do
-                SetMediaTrackInfo_Value(e.track, "I_SOLO", 0)
+                cue_solo.set(e.track, false)
             end
+            cue_solo.clear_all()
             Undo_EndBlock("Unsolo All Tracks", -1)
             say("All tracks unsoloed")
         elseif char == 77 then
