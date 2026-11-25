@@ -648,7 +648,7 @@ function M.try_add_remove(cmd)
         talkback_track.create(tonumber(tb_input) - 1, nil)
         Undo_EndBlock("Add Talkback Track", -1)
         say("Talkback track added, input " .. tb_input
-            .. ". Muted. Set its output with tb=out,N")
+            .. ". Muted. Set its output in Mixer Control with O")
         return true
     end
 
@@ -946,11 +946,16 @@ function M.try_routing_fx(cmd)
         local is_mixer = out_target:match("^%d+$") ~= nil
         local mono = is_mixer and not mixer_core.mixer_track_is_stereo(track)
         local width = mono and 1 or mixer_core.track_channel_width(track)
+        local prev_trim = GetTrackNumSends(track, 1) > 0
+            and GetTrackSendInfo_Value(track, 1, 0, "D_VOL") or 1.0
         if talkback_track.is_talkback_track(track) then
             width = 1
             talkback_track.set_output(track, ch - 1)
         else
             mixer_core.set_hw_output(track, ch - 1, mono)
+        end
+        if GetTrackNumSends(track, 1) > 0 then
+            SetTrackSendInfo_Value(track, 1, 0, "D_VOL", prev_trim)
         end
         local _, name = GetSetMediaTrackInfo_String(track, "P_NAME", "", false)
         local label = (width > 1) and string.format("%d and %d", ch, ch + width - 1) or tostring(ch)

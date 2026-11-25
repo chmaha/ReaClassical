@@ -83,8 +83,16 @@ local MENU_ITEMS = {
 
 local OTHER_MENU_ITEMS = {
     "Convert Workflow", "Connect All to RCM", "Disconnect All from RCM",
-    "Auto Assign HW Outputs", "Clear All HW Outputs",
+    "Auto Assign HW Outputs", "Clear All HW Outputs", "Solo-Safe RCM Outputs",
 }
+
+local function other_menu_label(idx)
+    local label = OTHER_MENU_ITEMS[idx]
+    if label == "Solo-Safe RCM Outputs" then
+        return label .. ", " .. (cue_solo.enabled() and "on" or "off")
+    end
+    return label
+end
 
 local function menu_index_of(label)
     for i, item in ipairs(MENU_ITEMS) do
@@ -561,6 +569,9 @@ local function mixer_control_shortcuts(entry)
     end
     if entry.type == "mixer" then
         list[#list + 1] = { key = "I", desc = "Announce current input" }
+    elseif entry.type == "listenback" or entry.type == "talkback" then
+        list[#list + 1] = { key = "I", desc = "Announce current input" }
+        list[#list + 1] = { key = "Shift+I", desc = "Change input" }
     end
     list[#list + 1] = { key = "O", desc = "Hardware output" }
     list[#list + 1] = { key = "F", desc = "FX chain" }
@@ -599,20 +610,22 @@ local function hw_output_status_text(track)
     local n = GetTrackNumSends(track, 1)
     if n == 0 then return "No hardware output" end
     local dst = math.floor(GetTrackSendInfo_Value(track, 1, 0, "I_DSTCHAN"))
+    local trim = linear_to_db(GetTrackSendInfo_Value(track, 1, 0, "D_VOL"))
+    local trim_text = math.abs(trim) >= 0.05 and string.format(", trim %.1f dB", trim) or ""
     if dst >= 1024 then
         local ch = dst - 1024
         local hw_name = GetOutputChannelName(ch)
         if hw_name and hw_name ~= "" then
-            return "Hardware output " .. hw_name
+            return "Hardware output " .. hw_name .. trim_text
         end
-        return string.format("Hardware output %d", ch + 1)
+        return string.format("Hardware output %d", ch + 1) .. trim_text
     end
     local hw_name1 = GetOutputChannelName(dst)
     local hw_name2 = GetOutputChannelName(dst + 1)
     if hw_name1 and hw_name1 ~= "" and hw_name2 and hw_name2 ~= "" then
-        return string.format("Hardware output %s and %s", hw_name1, hw_name2)
+        return string.format("Hardware output %s and %s", hw_name1, hw_name2) .. trim_text
     end
-    return string.format("Hardware output %d and %d", dst + 1, dst + 2)
+    return string.format("Hardware output %d and %d", dst + 1, dst + 2) .. trim_text
 end
 
 local function announce_hw_output(with_hint)
@@ -621,7 +634,7 @@ local function announce_hw_output(with_hint)
     local status = hw_output_status_text(entry.track)
     if with_hint then
         say(string.format("%s. %s. Enter opens an input box for the channel number, "
-            .. "C to clear, Escape to cancel.", mc_display(entry), status))
+            .. "T for trim, C to clear, Escape to cancel.", mc_display(entry), status))
     else
         say(status)
     end
@@ -958,7 +971,7 @@ local function handle_key(char)
             elseif menu_idx == 9 then
                 other_menu_idx = 1
                 state = STATE_OTHER_MENU
-                say(OTHER_MENU_ITEMS[other_menu_idx]
+                say(other_menu_label(other_menu_idx)
                     .. ". Up or down to browse, Enter to select, Escape to go back.")
             elseif menu_idx == 10 then
                 refresh_mc_tracks()
@@ -981,10 +994,10 @@ local function handle_key(char)
     elseif state == STATE_OTHER_MENU then
         if char == KEY_UP then
             other_menu_idx = other_menu_idx > 1 and other_menu_idx - 1 or #OTHER_MENU_ITEMS
-            say(OTHER_MENU_ITEMS[other_menu_idx])
+            say(other_menu_label(other_menu_idx))
         elseif char == KEY_DOWN then
             other_menu_idx = other_menu_idx < #OTHER_MENU_ITEMS and other_menu_idx + 1 or 1
-            say(OTHER_MENU_ITEMS[other_menu_idx])
+            say(other_menu_label(other_menu_idx))
         elseif char == KEY_ENTER then
             if other_menu_idx == 1 then
                 local target = workflow == "Horizontal" and "Vertical" or "Horizontal"
@@ -997,8 +1010,10 @@ local function handle_key(char)
             elseif other_menu_idx == 4 then
                 state = STATE_HW_AUTO
                 say("Auto Assign HW Outputs. Enter opens the input box; leave it empty to start from output 1, Escape to cancel.")
-            else
+            elseif other_menu_idx == 5 then
                 run_terminal_command("clearhw")
+            else
+                run_terminal_command(cue_solo.enabled() and "cuesolo=off" or "cuesolo=on")
             end
         elseif char == KEY_ESC then
             state = STATE_MENU
@@ -1012,7 +1027,7 @@ local function handle_key(char)
                 local _, wf = GetProjExtState(0, "ReaClassical", "Workflow")
                 workflow = wf
                 state = STATE_OTHER_MENU
-                say(OTHER_MENU_ITEMS[other_menu_idx])
+                say(other_menu_label(other_menu_idx))
             else
                 say("Closing.")
                 return false
@@ -1020,7 +1035,7 @@ local function handle_key(char)
         elseif char == KEY_ESC then
             say("Cancelled")
             state = STATE_OTHER_MENU
-            say(OTHER_MENU_ITEMS[other_menu_idx])
+            say(other_menu_label(other_menu_idx))
         end
     elseif state == STATE_HW_AUTO then
         if char == KEY_ENTER then
@@ -1029,13 +1044,13 @@ local function handle_key(char)
             if ok then
                 run_terminal_command(entered == "" and "aho" or ("aho=" .. entered))
                 state = STATE_OTHER_MENU
-                say(OTHER_MENU_ITEMS[other_menu_idx])
+                say(other_menu_label(other_menu_idx))
             else
                 say("Cancelled")
             end
         elseif char == KEY_ESC then
             state = STATE_OTHER_MENU
-            say(OTHER_MENU_ITEMS[other_menu_idx])
+            say(other_menu_label(other_menu_idx))
         end
     elseif state == STATE_TRACK_NAME then
         if char == KEY_UP or char == KEY_DOWN then
@@ -1458,8 +1473,16 @@ local function handle_key(char)
         elseif char == 107 then
             SetMediaTrackInfo_Value(track, "D_VOL", 0.0)
             say("Fader minus infinity")
+        elseif char == 73 and (entry.type == "listenback" or entry.type == "talkback") then
+            local entered = ask_number_required(WINDOW_TITLE,
+                mc_type_label(entry) .. " Input", "Please enter an input channel number")
+            if entered and tonumber(entered) then
+                run_terminal_command((entry.type == "talkback" and "addtb=" or "addlb=") .. math.floor(tonumber(entered)))
+            else
+                say("Cancelled")
+            end
         elseif char == 105 or char == 73 then
-            if entry.type == "mixer" then
+            if entry.type == "mixer" or entry.type == "listenback" or entry.type == "talkback" then
                 say(input_status_text(track):gsub("^%l", string.upper))
             else
                 say("No input for this track")
@@ -1598,6 +1621,26 @@ local function handle_key(char)
             run_terminal_command(mc_target_token(entry) .. "rmout")
             state = STATE_MIXER_CONTROL
             announce_mixer_control(false)
+        elseif char == 116 or char == 84 then
+            if GetTrackNumSends(entry.track, 1) == 0 then
+                say("Set a hardware output first")
+            else
+                local ok, entered = ui_input.ask(WINDOW_TITLE, WINDOW_TITLE .. " - Output Trim",
+                    "Trim in dB, e.g. -11.8 for a +4 dBu output into a -10 dBV input", "")
+                local db = ok and tonumber(entered) or nil
+                if not ok then
+                    say("Cancelled")
+                elseif not db or db < -60 or db > 12 then
+                    say("Please enter a number of dB between -60 and 12")
+                else
+                    Undo_BeginBlock()
+                    for j = 0, GetTrackNumSends(entry.track, 1) - 1 do
+                        SetTrackSendInfo_Value(entry.track, 1, j, "D_VOL", db_to_linear(db))
+                    end
+                    Undo_EndBlock("Set hardware output trim", -1)
+                    say(hw_output_status_text(entry.track))
+                end
+            end
         elseif char == KEY_ESC then
             say("Cancelled")
             state = STATE_MIXER_CONTROL
@@ -1927,7 +1970,7 @@ local function status_line()
     if state == STATE_MENU then
         return "[Track Setup]  " .. MENU_ITEMS[menu_idx]
     elseif state == STATE_OTHER_MENU then
-        return "[Other Commands]  " .. OTHER_MENU_ITEMS[other_menu_idx]
+        return "[Other Commands]  " .. other_menu_label(other_menu_idx)
     elseif state == STATE_TRACK_NAME then
         local track = mixer_tracks[tn_position]
         local name = track and track_rename.get_mixer_base_name(track) or ""
