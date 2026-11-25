@@ -1,9 +1,10 @@
 @description ReaClassical
 @author chmaha
-@version 27.0.30
+@version 27.0.31
 @changelog
-  End split at cursor
-  Add section about factory reset and customizations
+  Add solo-safe, output trim and LB/TB input to accessible Track Setup
+  Add solo-safe RCM outputs and hardware output trim
+  Add talkback special track
 @metapackage
 @provides
   [main] ReaClassical_*.lua

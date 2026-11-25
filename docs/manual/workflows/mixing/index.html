@@ -180,6 +180,16 @@
 <p>If you have the Fiedler Beam plugin on your system, use the Mission Control <kbd>Enable Atmos</kbd> that appears to add RCFader plugins and Fiedler Beam plugins to every Mixer track as necessary. This will also pass the current mixer fader values to the RCFader plugin. Subsequent presses of the button will check presence of RCFader and Fiedler plugins, and relative position between them, and synchronize fader values. Use <kbd>Disable Atmos</kbd> to deactivate both RCFader and Fiedler Beam plugins on every mixer track. </p>
 <h3 id="mixing-with-outboard-gear">Mixing with Outboard Gear</h3>
 <p>Use the Mission Control <kbd>HW Outputs</kbd> to set direct connections to hardware either automatically or manually. If you do not need connections to RCMASTER, disable using the dedicated button in the main Mission Control window. <kbd>Ctrl+Alt+Shift+T</kbd> toggles the mute on RCMASTER's own hardware output sends (it mutes all of them if any is unmuted, and unmutes only when all are muted), and <kbd>Alt+K</kbd> is Panic Mute, which silences everything that can reach your hardware outputs.</p>
+<h3 id="solo-safe-rcmaster-outputs">Solo-safe RCMASTER outputs</h3>
+<p>Normally, soloing a track changes everything after RCMASTER: its hardware outputs, the live bounce and the master. To send a full mix to another destination (for example a video team's vision mixer) while you solo freely on your speakers and headphones, tick <strong>Solo-safe RCMASTER outputs</strong> in <kbd>HW Outputs</kbd> and route RCMASTER to that destination's outputs there. Your monitors should be fed from the REAPER master's hardware outputs.</p>
+<p>With the option on, ReaClassical's solo controls (the Mission Control solo buttons, the mixer solo shortcuts, the Terminal and accessible solo commands, and mixer snapshots) only change what reaches the REAPER master. Soloed tracks go straight to the master, and RCMASTER is taken off the master while anything is soloed. RCMASTER's hardware outputs and the live bounce always carry the full mix. Turning the option on or off converts any existing solos.</p>
+<p>Things to be aware of:</p>
+<ul>
+<li>Soloed tracks bypass any FX on RCMASTER, like an after-fader solo on a console.</li>
+<li>REAPER's own solo buttons in the mixer and track panel still use REAPER's solo, which affects every output. Use ReaClassical's solo controls instead.</li>
+<li>Folder solos while auditioning and editing still use REAPER's solo.</li>
+</ul>
+<p>Each special-track output in <kbd>HW Outputs</kbd> has a trim next to it. Drag it, Ctrl+click it to type a value, or right-click it for presets. For example, -11.8 dB matches a +4 dBu interface output to a -10 dBV input such as a Blackmagic ATEM.</p>
 
 				<div class="clear"></div>
 
